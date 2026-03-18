@@ -224,19 +224,42 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
   // ═══ PROFILE THEME SYSTEM ═══
   const theme = getProfileTheme(profile);
 
+  // ═══ BRAND-AWARE THEME: override profile theme with brand colors ═══
+  const effectiveTheme = brandStore.isWhiteLabel ? {
+    ...theme,
+    accent: brandStore.getPrimaryColor(),
+    accentBright: brandStore.getSecondaryColor(),
+    accentDim: brandStore.getPrimaryColor() + "cc",
+    accentGlow: brandStore.getPrimaryColor() + "22",
+    nodeSelBorder: brandStore.getPrimaryColor() + "99",
+    flowParticle: brandStore.getPrimaryColor(),
+    borderHover: brandStore.getPrimaryColor() + "33",
+    borderAccent: brandStore.getPrimaryColor() + "20",
+    btnBg: `linear-gradient(135deg, ${brandStore.getPrimaryColor()}, ${brandStore.getSecondaryColor()})`,
+    cardBorder: brandStore.getPrimaryColor() + "25",
+  } : theme;
+
   // Apply profile theme to CSS custom properties
   useEffect(() => {
     const r = document.documentElement.style;
-    r.setProperty("--bg-canvas", theme.canvasBg);
-    r.setProperty("--bg-base", theme.sidebarBg);
-    r.setProperty("--node-bg", theme.nodeBg);
-    r.setProperty("--node-border-sel", theme.nodeSelBorder);
-    r.setProperty("--flow-particle", theme.flowParticle);
-    r.setProperty("--border-hover", theme.borderHover);
-    r.setProperty("--border-active", theme.accent);
-    r.setProperty("--shadow-glow", `0 0 20px ${theme.accentGlow}`);
+    r.setProperty("--bg-canvas", effectiveTheme.canvasBg);
+    r.setProperty("--bg-base", effectiveTheme.sidebarBg);
+    r.setProperty("--node-bg", effectiveTheme.nodeBg);
+    r.setProperty("--node-border-sel", effectiveTheme.nodeSelBorder);
+    r.setProperty("--flow-particle", effectiveTheme.flowParticle);
+    r.setProperty("--border-hover", effectiveTheme.borderHover);
+    r.setProperty("--border-active", effectiveTheme.accent);
+    r.setProperty("--shadow-glow", `0 0 20px ${effectiveTheme.accentGlow}`);
+    // Also override copper/gold/accent when branded
+    if (brandStore.isWhiteLabel) {
+      r.setProperty("--copper", brandStore.getPrimaryColor());
+      r.setProperty("--copper-bright", brandStore.getSecondaryColor());
+      r.setProperty("--gold", brandStore.getPrimaryColor());
+      r.setProperty("--gold-bright", brandStore.getSecondaryColor());
+      r.setProperty("--accent", brandStore.getPrimaryColor());
+      r.setProperty("--orange-accent", brandStore.getSecondaryColor());
+    }
     return () => {
-      // Clean up on profile change
       r.removeProperty("--bg-canvas");
       r.removeProperty("--bg-base");
     };
@@ -340,13 +363,13 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
   ];
 
   return (
-    <div style={{ height: "100vh", display: "flex", background: theme.canvasBg }}>
+    <div style={{ height: "100vh", display: "flex", background: effectiveTheme.canvasBg }}>
 
       {/* ═══ LEFT SIDEBAR (reference: vertical icon bar) ═══ */}
       <div style={{
         width: 180, display: "flex", flexDirection: "column",
         paddingTop: 12, paddingBottom: 12, gap: 2,
-        background: theme.sidebarBg, borderRight: `1px solid ${theme.borderAccent}`,
+        background: effectiveTheme.sidebarBg, borderRight: `1px solid ${effectiveTheme.borderAccent}`,
         position: "relative", zIndex: 40,
       }}>
         {/* Logo — White-label aware */}
@@ -361,15 +384,15 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
           ) : (
             <div style={{
               width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
-              background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentDim})`,
+              background: `linear-gradient(135deg, ${effectiveTheme.accent}, ${effectiveTheme.accentDim})`,
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 13, fontWeight: 800, color: "#0e0d0a", fontFamily: "Instrument Serif",
-              boxShadow: `0 0 12px ${theme.accentGlow}`,
+              boxShadow: `0 0 12px ${effectiveTheme.accentGlow}`,
             }}>H</div>
           )}
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, color: "var(--tx-primary)", fontFamily: "Instrument Serif", lineHeight: 1 }}>
-              {brandStore.isWhiteLabel ? brandStore.getDisplayName() : (<>Holding<span style={{ color: theme.accent }}>Vision</span></>)}
+              {brandStore.isWhiteLabel ? brandStore.getDisplayName() : (<>Holding<span style={{ color: effectiveTheme.accent }}>Vision</span></>)}
             </div>
             <div style={{ fontSize: 8, color: "var(--tx-tertiary)", fontFamily: "Space Mono", letterSpacing: "0.1em" }}>
               {brandStore.isWhiteLabel ? "PATRIMOINE" : "PRO"}
@@ -386,7 +409,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
               style={{
                 display: "flex", alignItems: "center", gap: 6, width: "100%",
                 padding: "6px 8px", borderRadius: 8, border: "1px solid rgba(212, 176, 98, 0.15)",
-                background: "rgba(212, 176, 98, 0.05)", color: theme.accent,
+                background: "rgba(212, 176, 98, 0.05)", color: effectiveTheme.accent,
                 fontSize: 10, fontWeight: 600, fontFamily: "Syne", cursor: "pointer",
                 transition: "all 0.2s",
               }}>
@@ -414,11 +437,11 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
               style={{
                 display: "flex", alignItems: "center", gap: 10, width: "100%",
                 padding: "8px 12px", borderRadius: 8, border: "none", cursor: "pointer",
-                background: isActive ? theme.btnActive : "transparent",
-                color: isActive ? theme.accentBright : "var(--tx-secondary)",
+                background: isActive ? effectiveTheme.btnActive : "transparent",
+                color: isActive ? effectiveTheme.accentBright : "var(--tx-secondary)",
                 fontSize: 11, fontWeight: isActive ? 700 : 500, fontFamily: "Syne",
                 textAlign: "left", transition: "all 0.15s",
-                borderLeft: isActive ? `2px solid ${theme.accent}` : "2px solid transparent",
+                borderLeft: isActive ? `2px solid ${effectiveTheme.accent}` : "2px solid transparent",
               }}
               onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = "var(--bg-card-hover)"; e.currentTarget.style.color = "var(--tx-primary)"; }}}
               onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--tx-secondary)"; }}}>
@@ -521,12 +544,12 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
           {/* Active profile badge */}
           <div style={{
             padding: "8px 10px", borderRadius: 10, marginBottom: 8,
-            background: theme.btnActive,
-            border: `1px solid ${theme.borderHover}`,
+            background: effectiveTheme.btnActive,
+            border: `1px solid ${effectiveTheme.borderHover}`,
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-              <span style={{ fontSize: 12, color: theme.accent }}>{profileData?.icon}</span>
-              <span style={{ fontSize: 10, fontWeight: 700, color: theme.accentBright }}>{profileData?.title}</span>
+              <span style={{ fontSize: 12, color: effectiveTheme.accent }}>{profileData?.icon}</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: effectiveTheme.accentBright }}>{profileData?.title}</span>
             </div>
             <div style={{ fontSize: 8, color: "var(--tx-tertiary)", lineHeight: 1.3 }}>{profileData?.subtitle}</div>
           </div>
@@ -562,39 +585,39 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
       </div>
 
       {/* ═══ MAIN AREA ═══ */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: theme.canvasBg }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: effectiveTheme.canvasBg }}>
 
         {/* Top bar */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "8px 20px", borderBottom: `1px solid ${theme.borderAccent}`,
-          background: theme.topBarBg, backdropFilter: "blur(10px)",
+          padding: "8px 20px", borderBottom: `1px solid ${effectiveTheme.borderAccent}`,
+          background: effectiveTheme.topBarBg, backdropFilter: "blur(10px)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 10, fontWeight: 600, color: "var(--tx-tertiary)" }}>Client :</span>
             <input value={client} onChange={e => setClient(e.target.value)}
-              className="input-dark" style={{ width: 180, padding: "5px 12px", fontSize: 13, fontWeight: 600, color: theme.accentBright }}
+              className="input-dark" style={{ width: 180, padding: "5px 12px", fontSize: 13, fontWeight: 600, color: effectiveTheme.accentBright }}
               placeholder="Nom du client" />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {/* Annuel / Mensuel toggle */}
             <div style={{
               display: "flex", borderRadius: 6, overflow: "hidden",
-              border: `1px solid ${theme.borderAccent}`, marginRight: 12,
+              border: `1px solid ${effectiveTheme.borderAccent}`, marginRight: 12,
             }}>
               {["annuel", "mensuel"].map(mode => (
                 <button key={mode} onClick={() => setDisplayMode(mode)}
                   style={{
                     padding: "3px 10px", border: "none", cursor: "pointer",
                     fontSize: 9, fontWeight: 700, fontFamily: "Space Mono", textTransform: "uppercase",
-                    background: displayMode === mode ? theme.accent : "transparent",
+                    background: displayMode === mode ? effectiveTheme.accent : "transparent",
                     color: displayMode === mode ? "#0e0d0a" : "var(--tx-tertiary)",
                     transition: "all 0.15s",
                   }}>{mode === "annuel" ? "AN" : "MOIS"}</button>
               ))}
             </div>
             <span style={{ fontSize: 10, color: "var(--tx-tertiary)", fontFamily: "Space Mono" }}>
-              Tréso <b style={{ color: theme.accent }}>{fMoney(dsp(tot.treso))}{dspSuffix}</b>
+              Tréso <b style={{ color: effectiveTheme.accent }}>{fMoney(dsp(tot.treso))}{dspSuffix}</b>
               <span style={{ margin: "0 8px", color: "var(--tx-muted)" }}>|</span>
               IS <b style={{ color: "var(--c-fisc)" }}>{fMoney(dsp(tot.is))}{dspSuffix}</b>
               <span style={{ margin: "0 8px", color: "var(--tx-muted)" }}>|</span>
@@ -610,8 +633,8 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
           {tab === "canvas" && (
             <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
               {/* Ambient color glow */}
-              <div style={{ position: "absolute", inset: 0, background: theme.canvasGradient, pointerEvents: "none", zIndex: 1 }} />
-              <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", cursor: isPanning ? "grabbing" : "grab", background: theme.canvasBg }}
+              <div style={{ position: "absolute", inset: 0, background: effectiveTheme.canvasGradient, pointerEvents: "none", zIndex: 1 }} />
+              <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", cursor: isPanning ? "grabbing" : "grab", background: effectiveTheme.canvasBg }}
               onMouseDown={onBg} onMouseMove={onMM} onMouseUp={onMU} onWheel={onWh}>
               <defs>
                 <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
@@ -628,7 +651,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
 
                 {/* Grid dots */}
                 {Array.from({ length: 40 }, (_, i) => Array.from({ length: 30 }, (_, j) => (
-                  <circle key={`${i}-${j}`} cx={i * 50 - 500} cy={j * 50 - 300} r={0.7} fill={theme.gridDot} />
+                  <circle key={`${i}-${j}`} cx={i * 50 - 500} cy={j * 50 - 300} r={0.7} fill={effectiveTheme.gridDot} />
                 )))}
 
                 {/* Edges */}
@@ -647,7 +670,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                         strokeOpacity={isSel ? 0.9 : 0.4} markerEnd="url(#ah)" strokeDasharray={amt > 0 ? "" : "4 4"} />
                       {/* Flow particles - YELLOW/GOLD for high visibility */}
                       {amt > 0 && [0, 1, 2].map(j => (
-                        <circle key={j} r={Math.min(3.5, 1.5 + amt / 15000)} fill={theme.flowParticle} opacity={0.9}>
+                        <circle key={j} r={Math.min(3.5, 1.5 + amt / 15000)} fill={effectiveTheme.flowParticle} opacity={0.9}>
                           <animateMotion dur={`${Math.max(1.5, 4 - amt / 15000)}s`} repeatCount="indefinite" begin={`${j}s`} path={p.d} />
                         </circle>
                       ))}
@@ -658,7 +681,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                           stroke={c} strokeWidth={isSel ? 1.2 : 0.6} strokeOpacity={isSel ? 0.8 : amt > 0 ? 0.5 : 0.2} />
                         {amt > 0 ? (
                           <text x={p.mx} y={p.my + 3} textAnchor="middle" fontSize={8.5} fontWeight={700}
-                            fill={theme.accentBright} fontFamily="Space Mono">{fMoney(dsp(amt))} {dspSuffix}</text>
+                            fill={effectiveTheme.accentBright} fontFamily="Space Mono">{fMoney(dsp(amt))} {dspSuffix}</text>
                         ) : (
                           <text x={p.mx} y={p.my + 3} textAnchor="middle" fontSize={7.5} fontWeight={500}
                             fill="var(--tx-tertiary)" fontFamily="Space Mono" opacity={isSel ? 0.8 : 0.4}>configurer</text>
@@ -710,7 +733,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                         fill="rgba(0,0,0,0.4)" />
                       {/* Card bg - BRIGHTER than canvas bg */}
                       <rect x={node.x} y={node.y} width={w} height={h} rx={12}
-                        fill={theme.nodeBg} stroke={isSel ? c : "rgba(255,255,255,0.12)"} strokeWidth={isSel ? 2 : 1} />
+                        fill={effectiveTheme.nodeBg} stroke={isSel ? c : "rgba(255,255,255,0.12)"} strokeWidth={isSel ? 2 : 1} />
                       {/* Top accent bar - full width, thicker */}
                       <rect x={node.x} y={node.y} width={w} height={3} rx={1.5} fill={c} opacity={0.8}
                         style={{ clipPath: `inset(0 0 0 0 round 12px 12px 0 0)` }} />
@@ -774,7 +797,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
           {tab === "canvas" && (sN || sE) && (
             <div className="anim-slide" style={{
               width: 340, overflowY: "auto",
-              background: "var(--bg-card)", borderLeft: `1px solid ${theme.borderAccent}`,
+              background: "var(--bg-card)", borderLeft: `1px solid ${effectiveTheme.borderAccent}`,
               boxShadow: "-4px 0 24px rgba(0,0,0,0.3)",
             }}>
               {sN && (() => {
@@ -844,7 +867,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
       {addMenu && (
         <div className="anim-scale" style={{
           position: "fixed", left: 190, top: 200, zIndex: 60,
-          background: "var(--bg-elevated)", border: `1px solid ${theme.borderHover}`,
+          background: "var(--bg-elevated)", border: `1px solid ${effectiveTheme.borderHover}`,
           borderRadius: 14, padding: 8, minWidth: 200, boxShadow: "var(--shadow-lg)",
         }}>
           {ETYPES.filter(et => !et.brick || activeBricks.includes(et.brick)).map(et => (
@@ -899,7 +922,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
 
       {/* Compare A/B - replaces main content */}
       {showCompare && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 90, background: theme.canvasBg }}>
+        <div style={{ position: "fixed", inset: 0, zIndex: 90, background: effectiveTheme.canvasBg }}>
           <CompareView
             nodesA={nodes} edgesA={edges} theme={theme}
             onClose={() => setShowCompare(false)}
