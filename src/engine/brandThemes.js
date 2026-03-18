@@ -25,7 +25,7 @@ export const BRAND_THEMES = {
     canvasBg: "#f4f5f8",
     canvasGradient: "radial-gradient(ellipse at 50% 30%, rgba(30,39,74,0.04) 0%, transparent 60%)",
     sidebarBg: "#1e274a",
-    topBarBg: "rgba(255,255,255,0.95)",
+    topBarBg: "#1e274a",
     gridDot: "#d0d4de",
 
     // Accent colors
@@ -34,12 +34,12 @@ export const BRAND_THEMES = {
     accentDim: "#15527a",
     accentGlow: "rgba(30,115,190,0.12)",
 
-    // Nodes
-    nodeBg: "#ffffff",
-    nodeBorder: "rgba(30,39,74,0.15)",
+    // Nodes — bleu marine like sidebar
+    nodeBg: "#1e274a",
+    nodeBorder: "rgba(30,115,190,0.40)",
     nodeSelBorder: "#1e73be",
-    nodeText: "#1e274a",
-    nodeSubtext: "#6b7294",
+    nodeText: "#ffffff",
+    nodeSubtext: "rgba(255,255,255,0.65)",
 
     // Flows
     flowParticle: "#1e73be",
@@ -74,6 +74,9 @@ export const BRAND_THEMES = {
     sidebarAccent: "#5ca0e0",
     sidebarBorder: "rgba(255,255,255,0.10)",
     sidebarBtnActive: "rgba(255,255,255,0.12)",
+
+    // Logo area — white background for the logo at top of sidebar
+    sidebarLogoBg: "#ffffff",
 
     // Input
     inputBg: "#f0f1f6",

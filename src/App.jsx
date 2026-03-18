@@ -418,20 +418,28 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
       {/* ═══ LEFT SIDEBAR (reference: vertical icon bar) ═══ */}
       <div style={{
         width: 180, display: "flex", flexDirection: "column",
-        paddingTop: 12, paddingBottom: 12, gap: 2,
+        paddingTop: 0, paddingBottom: 12, gap: 2,
         background: effectiveTheme.sidebarBg, borderRight: `1px solid ${effectiveTheme.borderAccent}`,
         position: "relative", zIndex: 40,
       }}>
         {/* Logo — White-label aware */}
-        <div style={{
-          display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", marginBottom: 8,
-        }}>
-          {brandStore.isWhiteLabel && brandStore.getLogoUrl() ? (
-            <img src={brandStore.getLogoUrl()} alt=""
-              style={{ width: 30, height: 30, borderRadius: 8, objectFit: "contain", flexShrink: 0, background: "#1c1b18" }}
+        {brandStore.isWhiteLabel && brandStore.getLogoUrl() ? (
+          <div style={{
+            background: effectiveTheme.sidebarLogoBg || "#ffffff",
+            padding: "10px 12px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            borderBottom: `1px solid ${effectiveTheme.sidebarBorder || "rgba(255,255,255,0.1)"}`,
+            marginBottom: 8, flexShrink: 0,
+          }}>
+            <img src={brandStore.getLogoUrl()} alt={brandStore.getDisplayName()}
+              style={{ maxWidth: "100%", maxHeight: 48, objectFit: "contain" }}
               onError={e => { e.target.style.display = "none"; }}
             />
-          ) : (
+          </div>
+        ) : (
+          <div style={{
+            display: "flex", alignItems: "center", gap: 10, padding: "20px 12px 8px", marginBottom: 8,
+          }}>
             <div style={{
               width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
               background: `linear-gradient(135deg, ${effectiveTheme.accent}, ${effectiveTheme.accentDim})`,
@@ -439,16 +447,14 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
               fontSize: 13, fontWeight: 800, color: "#0e0d0a", fontFamily: "Instrument Serif",
               boxShadow: `0 0 12px ${effectiveTheme.accentGlow}`,
             }}>H</div>
-          )}
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--tx-primary)", fontFamily: "Instrument Serif", lineHeight: 1 }}>
-              {brandStore.isWhiteLabel ? brandStore.getDisplayName() : (<>Holding<span style={{ color: effectiveTheme.accent }}>Vision</span></>)}
-            </div>
-            <div style={{ fontSize: 8, color: "var(--tx-tertiary)", fontFamily: "Space Mono", letterSpacing: "0.1em" }}>
-              {brandStore.isWhiteLabel ? "PATRIMOINE" : "PRO"}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: effectiveTheme.sidebarText || "var(--tx-primary)", fontFamily: "Instrument Serif", lineHeight: 1 }}>
+                Holding<span style={{ color: effectiveTheme.accent }}>Vision</span>
+              </div>
+              <div style={{ fontSize: 8, color: effectiveTheme.sidebarTextDim || "var(--tx-tertiary)", fontFamily: "Space Mono", letterSpacing: "0.1em" }}>PRO</div>
             </div>
           </div>
-        </div>
+        )}
 
         <div style={{ width: "100%", height: 1, background: "var(--border)", marginBottom: 4 }} />
 
@@ -487,14 +493,14 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
               style={{
                 display: "flex", alignItems: "center", gap: 10, width: "100%",
                 padding: "8px 12px", borderRadius: 8, border: "none", cursor: "pointer",
-                background: isActive ? effectiveTheme.btnActive : "transparent",
-                color: isActive ? effectiveTheme.accentBright : "var(--tx-secondary)",
+                background: isActive ? (effectiveTheme.sidebarBtnActive || effectiveTheme.btnActive) : "transparent",
+                color: isActive ? (effectiveTheme.sidebarAccent || effectiveTheme.accentBright) : (effectiveTheme.sidebarTextDim || "var(--tx-secondary)"),
                 fontSize: 11, fontWeight: isActive ? 700 : 500, fontFamily: "Syne",
                 textAlign: "left", transition: "all 0.15s",
-                borderLeft: isActive ? `2px solid ${effectiveTheme.accent}` : "2px solid transparent",
+                borderLeft: isActive ? `2px solid ${effectiveTheme.sidebarAccent || effectiveTheme.accent}` : "2px solid transparent",
               }}
-              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = "var(--bg-card-hover)"; e.currentTarget.style.color = "var(--tx-primary)"; }}}
-              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--tx-secondary)"; }}}>
+              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = effectiveTheme.sidebarBtnActive || "var(--bg-card-hover)"; e.currentTarget.style.color = effectiveTheme.sidebarText || "var(--tx-primary)"; }}}
+              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = effectiveTheme.sidebarTextDim || "var(--tx-secondary)"; }}}>
               <span style={{ fontSize: 13, width: 20, textAlign: "center", opacity: isActive ? 1 : 0.6 }}>{it.icon}</span>
               <span>{it.label}</span>
             </button>
@@ -504,19 +510,19 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
         <div style={{ width: "calc(100% - 24px)", height: 1, background: "var(--border)", margin: "8px 12px" }} />
 
         {/* Actions */}
-        <div style={{ padding: "0 6px", fontSize: 8, fontWeight: 700, color: "var(--tx-tertiary)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4, paddingLeft: 12 }}>Actions</div>
+        <div style={{ padding: "0 6px", fontSize: 8, fontWeight: 700, color: effectiveTheme.sidebarTextDim || "var(--tx-tertiary)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4, paddingLeft: 12 }}>Actions</div>
         {sideItems.filter(it => it.action).map(it => (
           <button key={it.id} onClick={it.action}
             style={{
               display: "flex", alignItems: "center", gap: 10, width: "100%",
               padding: "7px 12px", borderRadius: 8, border: "none", cursor: "pointer",
-              background: "transparent", color: "var(--tx-secondary)",
+              background: "transparent", color: effectiveTheme.sidebarTextDim || "var(--tx-secondary)",
               fontSize: 11, fontWeight: 500, fontFamily: "Syne",
               textAlign: "left", transition: "all 0.15s",
               borderLeft: "2px solid transparent",
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-card-hover)"; e.currentTarget.style.color = "var(--tx-primary)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--tx-secondary)"; }}>
+            onMouseEnter={e => { e.currentTarget.style.background = effectiveTheme.sidebarBtnActive || "var(--bg-card-hover)"; e.currentTarget.style.color = effectiveTheme.sidebarText || "var(--tx-primary)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = effectiveTheme.sidebarTextDim || "var(--tx-secondary)"; }}>
             <span style={{ fontSize: it.icon === "+" ? 16 : 13, width: 20, textAlign: "center", opacity: 0.6 }}>{it.icon}</span>
             <span>{it.label}</span>
           </button>
@@ -644,16 +650,21 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
           background: effectiveTheme.topBarBg, backdropFilter: "blur(10px)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "var(--tx-tertiary)" }}>Client :</span>
+            <span style={{ fontSize: 10, fontWeight: 600, color: effectiveTheme.sidebarTextDim || "var(--tx-tertiary)" }}>Client :</span>
             <input value={client} onChange={e => setClient(e.target.value)}
-              className="input-dark" style={{ width: 180, padding: "5px 12px", fontSize: 13, fontWeight: 600, color: effectiveTheme.accentBright }}
+              style={{
+                width: 180, padding: "5px 12px", fontSize: 13, fontWeight: 600,
+                color: effectiveTheme.sidebarText || effectiveTheme.accentBright,
+                background: "rgba(255,255,255,0.08)", border: `1px solid ${effectiveTheme.sidebarBorder || "var(--border)"}`,
+                borderRadius: 10, outline: "none", fontFamily: "Syne",
+              }}
               placeholder="Nom du client" />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {/* Annuel / Mensuel toggle */}
             <div style={{
               display: "flex", borderRadius: 6, overflow: "hidden",
-              border: `1px solid ${effectiveTheme.borderAccent}`, marginRight: 12,
+              border: `1px solid ${effectiveTheme.sidebarBorder || effectiveTheme.borderAccent}`, marginRight: 12,
             }}>
               {["annuel", "mensuel"].map(mode => (
                 <button key={mode} onClick={() => setDisplayMode(mode)}
@@ -661,16 +672,16 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                     padding: "3px 10px", border: "none", cursor: "pointer",
                     fontSize: 9, fontWeight: 700, fontFamily: "Space Mono", textTransform: "uppercase",
                     background: displayMode === mode ? effectiveTheme.accent : "transparent",
-                    color: displayMode === mode ? "#0e0d0a" : "var(--tx-tertiary)",
+                    color: displayMode === mode ? (effectiveTheme.btnText || "#0e0d0a") : (effectiveTheme.sidebarTextDim || "var(--tx-tertiary)"),
                     transition: "all 0.15s",
                   }}>{mode === "annuel" ? "AN" : "MOIS"}</button>
               ))}
             </div>
-            <span style={{ fontSize: 10, color: "var(--tx-tertiary)", fontFamily: "Space Mono" }}>
-              Tréso <b style={{ color: effectiveTheme.accent }}>{fMoney(dsp(tot.treso))}{dspSuffix}</b>
-              <span style={{ margin: "0 8px", color: "var(--tx-muted)" }}>|</span>
-              IS <b style={{ color: "var(--c-fisc)" }}>{fMoney(dsp(tot.is))}{dspSuffix}</b>
-              <span style={{ margin: "0 8px", color: "var(--tx-muted)" }}>|</span>
+            <span style={{ fontSize: 10, color: effectiveTheme.sidebarTextDim || "var(--tx-tertiary)", fontFamily: "Space Mono" }}>
+              Tréso <b style={{ color: effectiveTheme.sidebarAccent || effectiveTheme.accent }}>{fMoney(dsp(tot.treso))}{dspSuffix}</b>
+              <span style={{ margin: "0 8px", color: effectiveTheme.sidebarBorder || "var(--tx-muted)" }}>|</span>
+              IS <b style={{ color: "#f08070" }}>{fMoney(dsp(tot.is))}{dspSuffix}</b>
+              <span style={{ margin: "0 8px", color: effectiveTheme.sidebarBorder || "var(--tx-muted)" }}>|</span>
               {Math.round(zoom * 100)}%
             </span>
           </div>
