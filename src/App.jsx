@@ -867,10 +867,10 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
           {tab === "canvas" && (sN || sE) && (
             <div className="anim-slide" style={{
               width: 340, overflowY: "auto",
-              background: effectiveTheme.sidebarBg || "var(--bg-card)",
-              color: effectiveTheme.sidebarText || "var(--tx-primary)",
-              borderLeft: `1px solid ${effectiveTheme.sidebarBorder || effectiveTheme.borderAccent}`,
-              boxShadow: "-4px 0 24px rgba(0,0,0,0.3)",
+              background: effectiveTheme.mode === "light" ? "#f4f5f8" : (effectiveTheme.sidebarBg || "var(--bg-card)"),
+              color: effectiveTheme.mode === "light" ? "#1e274a" : (effectiveTheme.sidebarText || "var(--tx-primary)"),
+              borderLeft: `1px solid ${effectiveTheme.borderAccent || "var(--border)"}`,
+              boxShadow: "-4px 0 24px rgba(0,0,0,0.15)",
             }}>
               {sN && (() => {
                 const et = ETYPES.find(t => t.id === sN.type);
@@ -902,7 +902,29 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                   </div>
 
                   {/* Panel content */}
-                  <div style={{ padding: 16 }}>
+                  <div style={{
+                    padding: 16,
+                    ...(effectiveTheme.mode === "light" ? {
+                      "--tx-primary": "#1a1e35",
+                      "--tx-secondary": "#3a4060",
+                      "--tx-tertiary": "#6a7090",
+                      "--tx-muted": "#9aa0b8",
+                      "--tx": "#1a1e35",
+                      "--tx2": "#3a4060",
+                      "--tx3": "#6a7090",
+                      "--bg-elevated": "#ffffff",
+                      "--bg-input": "#ffffff",
+                      "--bg-card": "#ffffff",
+                      "--bg-card-hover": "#eef0f5",
+                      "--bg-surface": "#ffffff",
+                      "--card": "#ffffff",
+                      "--border": "rgba(30,39,74,0.15)",
+                      "--brd": "rgba(30,39,74,0.15)",
+                      "--copper": effectiveTheme.accent,
+                      "--gold": effectiveTheme.accent,
+                      "--accent": effectiveTheme.accent,
+                    } : {}),
+                  }}>
                     {sN.type === "societe" && <SocietePanel node={sN} computed={nc[selectedNode]} onData={(k, v) => updateNodeData(selectedNode, k, v)} />}
                     {sN.type === "holding" && <HoldingPanel node={sN} computed={nc[selectedNode]} onData={(k, v) => updateNodeData(selectedNode, k, v)} />}
                     {sN.type === "sci" && <SCIPanel node={sN} computed={nc[selectedNode]} onData={(k, v) => updateNodeData(selectedNode, k, v)} />}
