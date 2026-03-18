@@ -334,6 +334,10 @@ export function brandToEffectiveTheme(brand) {
     tagBg: brand.tagBg,
     tagBorder: brand.tagBorder,
     nodeSelBorder: brand.nodeSelBorder || brand.accent,
+    nodeBorder: brand.nodeBorder,
+    nodeText: brand.nodeText,
+    nodeSubtext: brand.nodeSubtext,
+    sidebarLogoBg: brand.sidebarLogoBg,
     // Extra properties for full theming
     mode: brand.mode,
     txPrimary: brand.txPrimary,

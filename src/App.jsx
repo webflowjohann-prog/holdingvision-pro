@@ -418,20 +418,28 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
       {/* ═══ LEFT SIDEBAR (reference: vertical icon bar) ═══ */}
       <div style={{
         width: 180, display: "flex", flexDirection: "column",
-        paddingTop: 12, paddingBottom: 12, gap: 2,
+        paddingTop: 0, paddingBottom: 12, gap: 2,
         background: effectiveTheme.sidebarBg, borderRight: `1px solid ${effectiveTheme.borderAccent}`,
         position: "relative", zIndex: 40,
       }}>
         {/* Logo — White-label aware */}
-        <div style={{
-          display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", marginBottom: 8,
-        }}>
-          {brandStore.isWhiteLabel && brandStore.getLogoUrl() ? (
-            <img src={brandStore.getLogoUrl()} alt=""
-              style={{ width: 30, height: 30, borderRadius: 8, objectFit: "contain", flexShrink: 0, background: "#1c1b18" }}
+        {brandStore.isWhiteLabel && brandStore.getLogoUrl() ? (
+          <div style={{
+            background: effectiveTheme.sidebarLogoBg || "#ffffff",
+            padding: "10px 12px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            borderBottom: `1px solid ${effectiveTheme.sidebarBorder || "rgba(255,255,255,0.1)"}`,
+            marginBottom: 8, flexShrink: 0,
+          }}>
+            <img src={brandStore.getLogoUrl()} alt={brandStore.getDisplayName()}
+              style={{ maxWidth: "100%", maxHeight: 48, objectFit: "contain" }}
               onError={e => { e.target.style.display = "none"; }}
             />
-          ) : (
+          </div>
+        ) : (
+          <div style={{
+            display: "flex", alignItems: "center", gap: 10, padding: "20px 12px 8px", marginBottom: 8,
+          }}>
             <div style={{
               width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
               background: `linear-gradient(135deg, ${effectiveTheme.accent}, ${effectiveTheme.accentDim})`,
@@ -439,16 +447,14 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
               fontSize: 13, fontWeight: 800, color: "#0e0d0a", fontFamily: "Instrument Serif",
               boxShadow: `0 0 12px ${effectiveTheme.accentGlow}`,
             }}>H</div>
-          )}
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--tx-primary)", fontFamily: "Instrument Serif", lineHeight: 1 }}>
-              {brandStore.isWhiteLabel ? brandStore.getDisplayName() : (<>Holding<span style={{ color: effectiveTheme.accent }}>Vision</span></>)}
-            </div>
-            <div style={{ fontSize: 8, color: "var(--tx-tertiary)", fontFamily: "Space Mono", letterSpacing: "0.1em" }}>
-              {brandStore.isWhiteLabel ? "PATRIMOINE" : "PRO"}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: effectiveTheme.sidebarText || "var(--tx-primary)", fontFamily: "Instrument Serif", lineHeight: 1 }}>
+                Holding<span style={{ color: effectiveTheme.accent }}>Vision</span>
+              </div>
+              <div style={{ fontSize: 8, color: effectiveTheme.sidebarTextDim || "var(--tx-tertiary)", fontFamily: "Space Mono", letterSpacing: "0.1em" }}>PRO</div>
             </div>
           </div>
-        </div>
+        )}
 
         <div style={{ width: "100%", height: 1, background: "var(--border)", marginBottom: 4 }} />
 
@@ -487,14 +493,14 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
               style={{
                 display: "flex", alignItems: "center", gap: 10, width: "100%",
                 padding: "8px 12px", borderRadius: 8, border: "none", cursor: "pointer",
-                background: isActive ? effectiveTheme.btnActive : "transparent",
-                color: isActive ? effectiveTheme.accentBright : "var(--tx-secondary)",
+                background: isActive ? (effectiveTheme.sidebarBtnActive || effectiveTheme.btnActive) : "transparent",
+                color: isActive ? (effectiveTheme.sidebarAccent || effectiveTheme.accentBright) : (effectiveTheme.sidebarTextDim || "var(--tx-secondary)"),
                 fontSize: 11, fontWeight: isActive ? 700 : 500, fontFamily: "Syne",
                 textAlign: "left", transition: "all 0.15s",
-                borderLeft: isActive ? `2px solid ${effectiveTheme.accent}` : "2px solid transparent",
+                borderLeft: isActive ? `2px solid ${effectiveTheme.sidebarAccent || effectiveTheme.accent}` : "2px solid transparent",
               }}
-              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = "var(--bg-card-hover)"; e.currentTarget.style.color = "var(--tx-primary)"; }}}
-              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--tx-secondary)"; }}}>
+              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = effectiveTheme.sidebarBtnActive || "var(--bg-card-hover)"; e.currentTarget.style.color = effectiveTheme.sidebarText || "var(--tx-primary)"; }}}
+              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = effectiveTheme.sidebarTextDim || "var(--tx-secondary)"; }}}>
               <span style={{ fontSize: 13, width: 20, textAlign: "center", opacity: isActive ? 1 : 0.6 }}>{it.icon}</span>
               <span>{it.label}</span>
             </button>
@@ -504,19 +510,19 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
         <div style={{ width: "calc(100% - 24px)", height: 1, background: "var(--border)", margin: "8px 12px" }} />
 
         {/* Actions */}
-        <div style={{ padding: "0 6px", fontSize: 8, fontWeight: 700, color: "var(--tx-tertiary)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4, paddingLeft: 12 }}>Actions</div>
+        <div style={{ padding: "0 6px", fontSize: 8, fontWeight: 700, color: effectiveTheme.sidebarTextDim || "var(--tx-tertiary)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4, paddingLeft: 12 }}>Actions</div>
         {sideItems.filter(it => it.action).map(it => (
           <button key={it.id} onClick={it.action}
             style={{
               display: "flex", alignItems: "center", gap: 10, width: "100%",
               padding: "7px 12px", borderRadius: 8, border: "none", cursor: "pointer",
-              background: "transparent", color: "var(--tx-secondary)",
+              background: "transparent", color: effectiveTheme.sidebarTextDim || "var(--tx-secondary)",
               fontSize: 11, fontWeight: 500, fontFamily: "Syne",
               textAlign: "left", transition: "all 0.15s",
               borderLeft: "2px solid transparent",
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = "var(--bg-card-hover)"; e.currentTarget.style.color = "var(--tx-primary)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--tx-secondary)"; }}>
+            onMouseEnter={e => { e.currentTarget.style.background = effectiveTheme.sidebarBtnActive || "var(--bg-card-hover)"; e.currentTarget.style.color = effectiveTheme.sidebarText || "var(--tx-primary)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = effectiveTheme.sidebarTextDim || "var(--tx-secondary)"; }}>
             <span style={{ fontSize: it.icon === "+" ? 16 : 13, width: 20, textAlign: "center", opacity: 0.6 }}>{it.icon}</span>
             <span>{it.label}</span>
           </button>
@@ -644,16 +650,21 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
           background: effectiveTheme.topBarBg, backdropFilter: "blur(10px)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "var(--tx-tertiary)" }}>Client :</span>
+            <span style={{ fontSize: 10, fontWeight: 600, color: effectiveTheme.sidebarTextDim || "var(--tx-tertiary)" }}>Client :</span>
             <input value={client} onChange={e => setClient(e.target.value)}
-              className="input-dark" style={{ width: 180, padding: "5px 12px", fontSize: 13, fontWeight: 600, color: effectiveTheme.accentBright }}
+              style={{
+                width: 180, padding: "5px 12px", fontSize: 13, fontWeight: 600,
+                color: effectiveTheme.sidebarText || effectiveTheme.accentBright,
+                background: "rgba(255,255,255,0.08)", border: `1px solid ${effectiveTheme.sidebarBorder || "var(--border)"}`,
+                borderRadius: 10, outline: "none", fontFamily: "Syne",
+              }}
               placeholder="Nom du client" />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {/* Annuel / Mensuel toggle */}
             <div style={{
               display: "flex", borderRadius: 6, overflow: "hidden",
-              border: `1px solid ${effectiveTheme.borderAccent}`, marginRight: 12,
+              border: `1px solid ${effectiveTheme.sidebarBorder || effectiveTheme.borderAccent}`, marginRight: 12,
             }}>
               {["annuel", "mensuel"].map(mode => (
                 <button key={mode} onClick={() => setDisplayMode(mode)}
@@ -661,16 +672,16 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                     padding: "3px 10px", border: "none", cursor: "pointer",
                     fontSize: 9, fontWeight: 700, fontFamily: "Space Mono", textTransform: "uppercase",
                     background: displayMode === mode ? effectiveTheme.accent : "transparent",
-                    color: displayMode === mode ? "#0e0d0a" : "var(--tx-tertiary)",
+                    color: displayMode === mode ? (effectiveTheme.btnText || "#0e0d0a") : (effectiveTheme.sidebarTextDim || "var(--tx-tertiary)"),
                     transition: "all 0.15s",
                   }}>{mode === "annuel" ? "AN" : "MOIS"}</button>
               ))}
             </div>
-            <span style={{ fontSize: 10, color: "var(--tx-tertiary)", fontFamily: "Space Mono" }}>
-              Tréso <b style={{ color: effectiveTheme.accent }}>{fMoney(dsp(tot.treso))}{dspSuffix}</b>
-              <span style={{ margin: "0 8px", color: "var(--tx-muted)" }}>|</span>
-              IS <b style={{ color: "var(--c-fisc)" }}>{fMoney(dsp(tot.is))}{dspSuffix}</b>
-              <span style={{ margin: "0 8px", color: "var(--tx-muted)" }}>|</span>
+            <span style={{ fontSize: 10, color: effectiveTheme.sidebarTextDim || "var(--tx-tertiary)", fontFamily: "Space Mono" }}>
+              Tréso <b style={{ color: effectiveTheme.sidebarAccent || effectiveTheme.accent }}>{fMoney(dsp(tot.treso))}{dspSuffix}</b>
+              <span style={{ margin: "0 8px", color: effectiveTheme.sidebarBorder || "var(--tx-muted)" }}>|</span>
+              IS <b style={{ color: "#f08070" }}>{fMoney(dsp(tot.is))}{dspSuffix}</b>
+              <span style={{ margin: "0 8px", color: effectiveTheme.sidebarBorder || "var(--tx-muted)" }}>|</span>
               {Math.round(zoom * 100)}%
             </span>
           </div>
@@ -770,6 +781,15 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                   else if (node.type === "employeur" && comp) sub = `${comp.statut} · Brut ${fMoney(comp.salaireBrut)}€/an`;
                   else if (node.type === "personne" && comp) sub = `Net ${fMoney(comp.netMensuel)}€/m · TMI ${comp.tmi}% · IR ${fMoney(comp.ir)}€`;
 
+                  const darkNode = effectiveTheme.nodeBg && effectiveTheme.nodeText === "#ffffff";
+                  // If node is dark, lighten the entity color for visibility
+                  const nc2 = darkNode ? (c + "90") : c;
+                  const iconColor = darkNode ? "#ffffff" : c;
+                  const badgeColor = darkNode ? "rgba(255,255,255,0.85)" : c;
+                  const badgeBg = darkNode ? "rgba(255,255,255,0.12)" : (c + "26");
+                  const badgeBorder = darkNode ? "rgba(255,255,255,0.25)" : (c + "66");
+                  const accentBarColor = darkNode ? effectiveTheme.accent : c;
+
                   return (
                     <g key={node.id} onMouseDown={e => onND(e, node)}
                       onMouseUp={() => { if (conn && conn !== node.id) { setFlowPick({ from: conn, to: node.id }); setConn(null); } }}
@@ -781,46 +801,46 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                       {/* Shadow layer */}
                       <rect x={node.x + 2} y={node.y + 3} width={w} height={h} rx={12}
                         fill={effectiveTheme.mode === "light" ? "rgba(0,0,0,0.08)" : "rgba(0,0,0,0.4)"} />
-                      {/* Card bg - BRIGHTER than canvas bg */}
+                      {/* Card bg */}
                       <rect x={node.x} y={node.y} width={w} height={h} rx={12}
-                        fill={effectiveTheme.nodeBg} stroke={isSel ? c : (effectiveTheme.mode === "light" ? c + "40" : "rgba(255,255,255,0.12)")} strokeWidth={isSel ? 2 : 1} />
-                      {/* Top accent bar - full width, thicker */}
-                      <rect x={node.x} y={node.y} width={w} height={3} rx={1.5} fill={c} opacity={0.8}
+                        fill={effectiveTheme.nodeBg} stroke={isSel ? accentBarColor : (darkNode ? "rgba(255,255,255,0.12)" : c + "40")} strokeWidth={isSel ? 2 : 1} />
+                      {/* Top accent bar */}
+                      <rect x={node.x} y={node.y} width={w} height={3} rx={1.5} fill={accentBarColor} opacity={0.8}
                         style={{ clipPath: `inset(0 0 0 0 round 12px 12px 0 0)` }} />
-                      <rect x={node.x + 1} y={node.y + 1} width={w - 2} height={2.5} fill={c} opacity={isSel ? 1 : 0.6} />
+                      <rect x={node.x + 1} y={node.y + 1} width={w - 2} height={2.5} fill={accentBarColor} opacity={isSel ? 1 : 0.6} />
                       {/* Left color stripe */}
-                      <rect x={node.x} y={node.y + 3} width={3} height={h - 6} fill={c} opacity={0.3} />
+                      <rect x={node.x} y={node.y + 3} width={3} height={h - 6} fill={accentBarColor} opacity={0.4} />
                       {/* Icon circle */}
-                      <circle cx={node.x + 20} cy={node.y + 24} r={10} fill={c} fillOpacity={0.15} stroke={c} strokeWidth={0.8} strokeOpacity={0.4} />
-                      <text x={node.x + 20} y={node.y + 27.5} textAnchor="middle" fontSize={10} fill={c}>{et?.icon}</text>
+                      <circle cx={node.x + 20} cy={node.y + 24} r={10} fill={darkNode ? "rgba(255,255,255,0.08)" : c} fillOpacity={darkNode ? 1 : 0.15} stroke={darkNode ? "rgba(255,255,255,0.20)" : c} strokeWidth={0.8} strokeOpacity={darkNode ? 1 : 0.4} />
+                      <text x={node.x + 20} y={node.y + 27.5} textAnchor="middle" fontSize={10} fill={iconColor}>{et?.icon}</text>
                       {/* Name */}
-                      <text x={node.x + 36} y={node.y + 27} fontSize={12} fontWeight={700} fill={effectiveTheme.nodeText || effectiveTheme.txPrimary || "#f0ece4"} fontFamily="Syne">
+                      <text x={node.x + 36} y={node.y + 27} fontSize={12} fontWeight={700} fill={effectiveTheme.nodeText || "#f0ece4"} fontFamily="Syne">
                         {node.l.length > 18 ? node.l.substring(0, 18) + "…" : node.l}
                       </text>
                       {/* Forme badge */}
                       {node.data?.forme && (
                         <>
                           <rect x={node.x + w - 46} y={node.y + 13} width={38} height={18} rx={9}
-                            fill={c} fillOpacity={0.15} stroke={c} strokeWidth={0.6} strokeOpacity={0.4} />
+                            fill={badgeBg} stroke={badgeBorder} strokeWidth={0.6} />
                           <text x={node.x + w - 27} y={node.y + 26} textAnchor="middle" fontSize={8} fontWeight={700}
-                            fill={c} fontFamily="Space Mono">{node.data.forme}</text>
+                            fill={badgeColor} fontFamily="Space Mono">{node.data.forme}</text>
                         </>
                       )}
-                      {/* Subtitle - visible secondary text */}
+                      {/* Subtitle */}
                       {sub && (
-                        <text x={node.x + 14} y={node.y + h - 10} fontSize={9} fill={effectiveTheme.nodeSubtext || effectiveTheme.txSecondary || "#b0a890"} fontFamily="Space Mono" fontWeight={500}>
+                        <text x={node.x + 14} y={node.y + h - 10} fontSize={9} fill={effectiveTheme.nodeSubtext || "#b0a890"} fontFamily="Space Mono" fontWeight={500}>
                           {sub.substring(0, 38)}
                         </text>
                       )}
                       {/* Associés */}
                       {node.data?.associes?.length > 0 && h > 55 && (
-                        <text x={node.x + 36} y={node.y + 41} fontSize={8.5} fill={effectiveTheme.txTertiary || "#807868"} fontFamily="Syne">
+                        <text x={node.x + 36} y={node.y + 41} fontSize={8.5} fill={effectiveTheme.nodeSubtext || "#807868"} fontFamily="Syne">
                           {node.data.associes.map(a => `${a.n} ${a.p}%`).join(" · ").substring(0, 38)}
                         </text>
                       )}
-                      {/* Connector handle - bright */}
+                      {/* Connector handle */}
                       <circle cx={node.x + w} cy={node.y + h / 2} r={5}
-                        fill={effectiveTheme.mode === "light" ? "#ffffff" : "#2c2a25"} stroke={c} strokeWidth={1.5} style={{ cursor: "crosshair" }}
+                        fill={darkNode ? effectiveTheme.nodeBg : "#ffffff"} stroke={accentBarColor} strokeWidth={1.5} style={{ cursor: "crosshair" }}
                         onMouseDown={e => { e.stopPropagation(); setConn(node.id); }} />
                     </g>
                   );
