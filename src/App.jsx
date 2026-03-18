@@ -780,10 +780,10 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                         fill="transparent" stroke="none" style={{ pointerEvents: "all" }} />
                       {/* Shadow layer */}
                       <rect x={node.x + 2} y={node.y + 3} width={w} height={h} rx={12}
-                        fill="rgba(0,0,0,0.4)" />
+                        fill={effectiveTheme.mode === "light" ? "rgba(0,0,0,0.08)" : "rgba(0,0,0,0.4)"} />
                       {/* Card bg - BRIGHTER than canvas bg */}
                       <rect x={node.x} y={node.y} width={w} height={h} rx={12}
-                        fill={effectiveTheme.nodeBg} stroke={isSel ? c : "rgba(255,255,255,0.12)"} strokeWidth={isSel ? 2 : 1} />
+                        fill={effectiveTheme.nodeBg} stroke={isSel ? c : (effectiveTheme.mode === "light" ? c + "40" : "rgba(255,255,255,0.12)")} strokeWidth={isSel ? 2 : 1} />
                       {/* Top accent bar - full width, thicker */}
                       <rect x={node.x} y={node.y} width={w} height={3} rx={1.5} fill={c} opacity={0.8}
                         style={{ clipPath: `inset(0 0 0 0 round 12px 12px 0 0)` }} />
@@ -793,8 +793,8 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                       {/* Icon circle */}
                       <circle cx={node.x + 20} cy={node.y + 24} r={10} fill={c} fillOpacity={0.15} stroke={c} strokeWidth={0.8} strokeOpacity={0.4} />
                       <text x={node.x + 20} y={node.y + 27.5} textAnchor="middle" fontSize={10} fill={c}>{et?.icon}</text>
-                      {/* Name - BRIGHT white */}
-                      <text x={node.x + 36} y={node.y + 27} fontSize={12} fontWeight={700} fill="#f0ece4" fontFamily="Syne">
+                      {/* Name */}
+                      <text x={node.x + 36} y={node.y + 27} fontSize={12} fontWeight={700} fill={effectiveTheme.nodeText || effectiveTheme.txPrimary || "#f0ece4"} fontFamily="Syne">
                         {node.l.length > 18 ? node.l.substring(0, 18) + "…" : node.l}
                       </text>
                       {/* Forme badge */}
@@ -808,19 +808,19 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                       )}
                       {/* Subtitle - visible secondary text */}
                       {sub && (
-                        <text x={node.x + 14} y={node.y + h - 10} fontSize={9} fill="#b0a890" fontFamily="Space Mono" fontWeight={500}>
+                        <text x={node.x + 14} y={node.y + h - 10} fontSize={9} fill={effectiveTheme.nodeSubtext || effectiveTheme.txSecondary || "#b0a890"} fontFamily="Space Mono" fontWeight={500}>
                           {sub.substring(0, 38)}
                         </text>
                       )}
                       {/* Associés */}
                       {node.data?.associes?.length > 0 && h > 55 && (
-                        <text x={node.x + 36} y={node.y + 41} fontSize={8.5} fill="#807868" fontFamily="Syne">
+                        <text x={node.x + 36} y={node.y + 41} fontSize={8.5} fill={effectiveTheme.txTertiary || "#807868"} fontFamily="Syne">
                           {node.data.associes.map(a => `${a.n} ${a.p}%`).join(" · ").substring(0, 38)}
                         </text>
                       )}
                       {/* Connector handle - bright */}
                       <circle cx={node.x + w} cy={node.y + h / 2} r={5}
-                        fill="#2c2a25" stroke={c} strokeWidth={1.5} style={{ cursor: "crosshair" }}
+                        fill={effectiveTheme.mode === "light" ? "#ffffff" : "#2c2a25"} stroke={c} strokeWidth={1.5} style={{ cursor: "crosshair" }}
                         onMouseDown={e => { e.stopPropagation(); setConn(node.id); }} />
                     </g>
                   );
@@ -847,7 +847,9 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
           {tab === "canvas" && (sN || sE) && (
             <div className="anim-slide" style={{
               width: 340, overflowY: "auto",
-              background: "var(--bg-card)", borderLeft: `1px solid ${effectiveTheme.borderAccent}`,
+              background: effectiveTheme.sidebarBg || "var(--bg-card)",
+              color: effectiveTheme.sidebarText || "var(--tx-primary)",
+              borderLeft: `1px solid ${effectiveTheme.sidebarBorder || effectiveTheme.borderAccent}`,
               boxShadow: "-4px 0 24px rgba(0,0,0,0.3)",
             }}>
               {sN && (() => {
