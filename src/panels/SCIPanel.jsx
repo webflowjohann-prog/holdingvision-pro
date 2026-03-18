@@ -76,7 +76,7 @@ export default function SCIPanel({ node, computed, onData }) {
       {c.totalLoyers != null && (
         <div className="mt-4 p-3 bg-[var(--bg-elevated)] rounded-xl">
           <Label>Résultats SCI</Label>
-          <ResultRow label="Loyers totaux" value={`${fMoney((c.totalLoyers || 0) + (c.inc || 0))} €/an`} bold />
+          <ResultRow label="Loyers totaux" value={`${fMoney(c.totalLoyers || 0)} €/an`} bold />
           <ResultRow label="Charges" value={`-${fMoney(c.charges || 0)} €`} negative />
           <ResultRow label="Intérêts emprunt" value={`-${fMoney(c.interets || 0)} €`} negative />
           {!isIR && <ResultRow label="Amortissement" value={`-${fMoney(c.amort || 0)} €`} />}
