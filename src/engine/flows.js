@@ -63,21 +63,22 @@ export function computeFlows(nodes, edges) {
 
   // ══════════════════════════════════════════════════
   // PASS 2: Auto-calculate LOYER flows
-  // When société → SCI (loyer): distribute SCI total loyer among locataires
-  // When SCI → foyer/holding (loyer): output total loyer
+  // Edge loyer Société→SCI (auto): amount = SCI.loyersMensuels * 12 / nb locataires
+  // Edge loyer SCI→foyer/holding (auto): amount = SCI.loyersMensuels * 12
+  // If SCI.loyersMensuels = 0, all auto loyer flows = 0
+  // montantFixe edges are NEVER touched (set in PASS 1)
   // ══════════════════════════════════════════════════
   nodes.filter(n => n.type === "sci").forEach(sci => {
     const loyerTotal = (sci.data?.loyersMensuels || 0) * 12;
-    if (loyerTotal <= 0) return;
     
-    // Incoming loyer edges (from sociétés/personnes paying rent TO this SCI)
+    // Incoming loyer edges (auto only)
     const inLoyerEdges = edges.filter(e => e.to === sci.id && e.flow === "loyer" && e.montantFixe == null);
     if (inLoyerEdges.length > 0) {
-      const perLocataire = Math.round(loyerTotal / inLoyerEdges.length);
+      const perLocataire = loyerTotal > 0 ? Math.round(loyerTotal / inLoyerEdges.length) : 0;
       inLoyerEdges.forEach(e => { fv[e.id] = perLocataire; });
     }
     
-    // Outgoing loyer edges (from SCI TO holding/foyer = total loyer income)
+    // Outgoing loyer edges (auto only)
     const outLoyerEdges = edges.filter(e => e.from === sci.id && e.flow === "loyer" && e.montantFixe == null);
     outLoyerEdges.forEach(e => { fv[e.id] = loyerTotal; });
   });
