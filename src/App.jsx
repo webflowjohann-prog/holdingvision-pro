@@ -26,6 +26,8 @@ import ChatBot from "./ai/ChatBot.jsx";
 // CompareScenarios removed - simplified to Canvas + Dashboard
 import TemplateChooser from "./ui/TemplateChooser.jsx";
 import ProfileSelector from "./ui/ProfileSelector.jsx";
+import BrandingSetup from "./ui/BrandingSetup.jsx";
+import useBrandStore from "./store/brandStore.js";
 import { ENTRY_PROFILES, BRICKS, getAvailableNodeTypes, getAISystemPrompt, getProfileTheme } from "./engine/bricks.js";
 import { analyzeAlerts } from "./engine/alerts.js";
 import { supabase } from "./lib/supabase.js";
@@ -156,6 +158,12 @@ function AppWithProject({ user, project, onBack, onLogout }) {
       return saved ? JSON.parse(saved) : null;
     } catch(e) { return null; }
   });
+  // Branding step: show after profile selection if no brand saved yet
+  const [showBranding, setShowBranding] = useState(false);
+  const brandStore = useBrandStore();
+
+  // Init brand on mount with userId (loads from Supabase, applies CSS vars)
+  useEffect(() => { brandStore.init(user?.id); }, [user?.id]);
 
   const handleProfileSelect = (id) => {
     const entry = ENTRY_PROFILES.find(p => p.id === id);
@@ -165,6 +173,10 @@ function AppWithProject({ user, project, onBack, onLogout }) {
       localStorage.setItem("hvpro-profile", id);
       localStorage.setItem("hvpro-bricks", JSON.stringify(entry?.activeBricks || ["socle"]));
     } catch(e) {}
+    // Show branding setup if no brand configured yet
+    if (!brandStore.brand) {
+      setShowBranding(true);
+    }
   };
 
   const toggleBrick = (brickId) => {
@@ -183,6 +195,18 @@ function AppWithProject({ user, project, onBack, onLogout }) {
     return <ProfileSelector onSelect={handleProfileSelect} />;
   }
 
+  // Show branding setup after profile selection (first time only)
+  if (showBranding) {
+    return <BrandingSetup
+      profileId={profile}
+      onComplete={(brand) => {
+        brandStore.setBrand(brand, user?.id);
+        setShowBranding(false);
+      }}
+      onSkip={() => setShowBranding(false)}
+    />;
+  }
+
   const profileData = ENTRY_PROFILES.find(p => p.id === profile);
 
   return <AppMain profile={profile} profileData={profileData} activeBricks={activeBricks} toggleBrick={toggleBrick}
@@ -192,6 +216,7 @@ function AppWithProject({ user, project, onBack, onLogout }) {
 
 function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProfile, project, onBack, onLogout, user }) {
   const store = useCanvasStore();
+  const brandStore = useBrandStore();
 
   // ═══ AUTO-SAVE to Supabase ═══
   useAutoSave(project?.id, store.nodes, store.edges);
@@ -238,6 +263,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
   const [showCompare, setShowCompare] = useState(false);
   const [showPresentation, setShowPresentation] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [showBrandEdit, setShowBrandEdit] = useState(false);
 
   // Display helper: converts annual amount to display mode
   const dsp = (annualAmount) => {
@@ -308,7 +334,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
     { id: "wizard", icon: "☻", label: "Nouveau client", action: () => setShowWizard(true) },
     { id: "compare", icon: "⇄", label: "Comparer A/B", action: () => setShowCompare(true) },
     { id: "present", icon: "▶", label: "Présentation", action: () => setShowPresentation(true) },
-    { id: "pdf", icon: "↗", label: "Export PDF", action: () => generatePDFReport(nodes, edges, client) },
+    { id: "pdf", icon: "↗", label: "Export PDF", action: () => generatePDFReport(nodes, edges, client, brandStore.getDisplayName(), brandStore.brand) },
     { id: "sep2", sep: true },
     { id: "reset", icon: "↺", label: "Reset", action: () => { reset(); try { localStorage.removeItem("hvpro"); } catch(e) {} } },
   ];
@@ -323,22 +349,31 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
         background: theme.sidebarBg, borderRight: `1px solid ${theme.borderAccent}`,
         position: "relative", zIndex: 40,
       }}>
-        {/* Logo */}
+        {/* Logo — White-label aware */}
         <div style={{
           display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", marginBottom: 8,
         }}>
-          <div style={{
-            width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
-            background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentDim})`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 13, fontWeight: 800, color: "#0e0d0a", fontFamily: "Instrument Serif",
-            boxShadow: `0 0 12px ${theme.accentGlow}`,
-          }}>H</div>
+          {brandStore.isWhiteLabel && brandStore.getLogoUrl() ? (
+            <img src={brandStore.getLogoUrl()} alt=""
+              style={{ width: 30, height: 30, borderRadius: 8, objectFit: "contain", flexShrink: 0, background: "#1c1b18" }}
+              onError={e => { e.target.style.display = "none"; }}
+            />
+          ) : (
+            <div style={{
+              width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
+              background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentDim})`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 13, fontWeight: 800, color: "#0e0d0a", fontFamily: "Instrument Serif",
+              boxShadow: `0 0 12px ${theme.accentGlow}`,
+            }}>H</div>
+          )}
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, color: "var(--tx-primary)", fontFamily: "Instrument Serif", lineHeight: 1 }}>
-              Holding<span style={{ color: theme.accent }}>Vision</span>
+              {brandStore.isWhiteLabel ? brandStore.getDisplayName() : (<>Holding<span style={{ color: theme.accent }}>Vision</span></>)}
             </div>
-            <div style={{ fontSize: 8, color: "var(--tx-tertiary)", fontFamily: "Space Mono", letterSpacing: "0.1em" }}>PRO</div>
+            <div style={{ fontSize: 8, color: "var(--tx-tertiary)", fontFamily: "Space Mono", letterSpacing: "0.1em" }}>
+              {brandStore.isWhiteLabel ? "PATRIMOINE" : "PRO"}
+            </div>
           </div>
         </div>
 
@@ -507,6 +542,19 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
             onMouseLeave={e => { e.currentTarget.style.color = "var(--tx-tertiary)"; e.currentTarget.style.background = "transparent"; }}>
             <span style={{ fontSize: 11 }}>↻</span>
             <span>Changer de profil</span>
+          </button>
+
+          <button onClick={() => setShowBrandEdit(true)}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", gap: 8,
+              padding: "6px 10px", borderRadius: 8, border: "none", cursor: "pointer",
+              background: "transparent", color: "var(--tx-tertiary)",
+              fontSize: 10, fontFamily: "Syne", textAlign: "left", transition: "all 0.15s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = "var(--tx-secondary)"; e.currentTarget.style.background = "var(--bg-card-hover)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = "var(--tx-tertiary)"; e.currentTarget.style.background = "transparent"; }}>
+            <span style={{ fontSize: 11 }}>◎</span>
+            <span>{brandStore.isWhiteLabel ? "Modifier ma marque" : "Personnaliser (marque blanche)"}</span>
           </button>
 
           <div style={{ fontSize: 8, color: "var(--tx-tertiary)", fontFamily: "Space Mono", padding: "6px 0 2px", textAlign: "center" }}>v1.0</div>
@@ -867,6 +915,18 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
       {/* Presentation mode */}
       {showPresentation && (
         <PresentationMode nodes={nodes} edges={edges} theme={theme} client={client} onClose={() => setShowPresentation(false)} />
+      )}
+
+      {/* Brand editing overlay */}
+      {showBrandEdit && (
+        <BrandingSetup
+          profileId={profile}
+          onComplete={(brand) => {
+            brandStore.setBrand(brand, user?.id);
+            setShowBrandEdit(false);
+          }}
+          onSkip={() => setShowBrandEdit(false)}
+        />
       )}
 
       {/* Actionable alerts panel (floating over canvas) */}

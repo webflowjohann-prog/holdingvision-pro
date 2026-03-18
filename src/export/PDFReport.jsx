@@ -7,9 +7,15 @@ import { fMoney } from "../lib/format.js";
  * Composant d'export PDF. Ouvre une nouvelle fenêtre avec le dossier client
  * formaté pour l'impression. Le CGP fait Ctrl+P → PDF.
  */
-export function generatePDFReport(nodes, edges, clientName = "Client", cabinetName = "") {
+export function generatePDFReport(nodes, edges, clientName = "Client", cabinetName = "", brand = null) {
   const kpi = computeKPI(nodes, edges);
   const proj = projectPatrimoine(nodes, edges, 15);
+
+  // Brand-aware colors
+  const accentColor = brand?.colors?.primary || "#b8963e";
+  const accentLight = brand?.colors?.secondary || accentColor;
+  const displayName = brand?.name || cabinetName || "HoldingVision Pro";
+  const logoUrl = brand?.logo || null;
 
   // Organigramme textuel
   const holdings = nodes.filter(n => n.type === "holding");
@@ -30,10 +36,10 @@ export function generatePDFReport(nodes, edges, clientName = "Client", cabinetNa
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: "Syne", sans-serif; color: #2a2925; background: #fff; padding: 40px; font-size: 11px; line-height: 1.5; }
   h1 { font-family: "Instrument Serif", serif; font-size: 28px; color: #1a1a1a; margin-bottom: 4px; }
-  h2 { font-family: "Instrument Serif", serif; font-size: 18px; color: #1a1a1a; margin: 28px 0 12px; border-bottom: 2px solid #b8963e; padding-bottom: 4px; }
+  h2 { font-family: "Instrument Serif", serif; font-size: 18px; color: #1a1a1a; margin: 28px 0 12px; border-bottom: 2px solid ${accentColor}; padding-bottom: 4px; }
   h3 { font-size: 13px; font-weight: 700; margin: 16px 0 8px; color: #2a2925; }
   .subtitle { color: #8a8880; font-size: 12px; margin-bottom: 24px; }
-  .gold { color: #b8963e; }
+  .gold { color: ${accentColor}; }
   .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
   .kpi { background: #FAF8F4; border: 1px solid #e8e4dd; border-radius: 8px; padding: 12px; }
   .kpi-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #8a8880; font-weight: 600; }
@@ -46,7 +52,7 @@ export function generatePDFReport(nodes, edges, clientName = "Client", cabinetNa
   .bold { font-weight: 700; }
   .green { color: #0d7c5f; }
   .red { color: #b83d2a; }
-  .gold-text { color: #b8963e; }
+  .gold-text { color: ${accentColor}; }
   .entity-card { background: #FAF8F4; border: 1px solid #e8e4dd; border-radius: 8px; padding: 12px; margin: 8px 0; }
   .entity-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   .entity-icon { font-size: 12px; }
@@ -64,13 +70,13 @@ export function generatePDFReport(nodes, edges, clientName = "Client", cabinetNa
 </head>
 <body>
 
-<div class="no-print" style="background:#b8963e;color:white;padding:12px 20px;border-radius:8px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
+<div class="no-print" style="background:${accentColor};color:white;padding:12px 20px;border-radius:8px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
   <span style="font-weight:600">Dossier prêt. Cliquez sur Imprimer pour générer le PDF.</span>
-  <button onclick="window.print()" style="background:white;color:#b8963e;border:none;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer;font-family:Syne">Imprimer / PDF</button>
+  <button onclick="window.print()" style="background:white;color:${accentColor};border:none;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer;font-family:Syne">Imprimer / PDF</button>
 </div>
 
-<h1>Dossier patrimonial <span class="gold">${clientName}</span></h1>
-<p class="subtitle">${cabinetName ? `Préparé par ${cabinetName} · ` : ""}Simulation générée le ${date} par HoldingVision Pro</p>
+${logoUrl ? `<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px"><img src="${logoUrl}" style="height:36px;object-fit:contain" onerror="this.style.display='none'" /><h1>Dossier patrimonial <span class="gold">${clientName}</span></h1></div>` : `<h1>Dossier patrimonial <span class="gold">${clientName}</span></h1>`}
+<p class="subtitle">Préparé par ${displayName} · Simulation générée le ${date}</p>
 
 <h2>Synthèse</h2>
 <div class="kpi-grid">
@@ -270,7 +276,7 @@ ${foyers.map(f => {
 <div id="alerts-section"></div>
 
 <div class="footer">
-  <span>Document généré par HoldingVision Pro — Simulation, non contractuel</span>
+  <span>Document généré par ${displayName} — Simulation, non contractuel</span>
   <span>${date}</span>
 </div>
 

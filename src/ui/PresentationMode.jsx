@@ -5,6 +5,7 @@ import { analyzeAlerts } from "../engine/alerts.js";
 import { ETYPES } from "../lib/constants.js";
 import { fMoney, uid } from "../lib/format.js";
 import useCanvasStore from "../store/canvasStore.js";
+import useBrandStore from "../store/brandStore.js";
 
 // Action generators for each alert type
 function getAlertActions(alert, nodes, edges) {
@@ -170,6 +171,7 @@ const SEV_ICONS = { critical: "⚠", warning: "⚡", opportunity: "💡", info: 
 
 export default function PresentationMode({ nodes, edges, theme, client, onClose }) {
   const store = useCanvasStore();
+  const brandStore = useBrandStore();
   const [zoom, setZoom] = useState(0.75);
   const [pan, setPan] = useState({ x: 50, y: 30 });
   const [isPanning, setIsPanning] = useState(false);
@@ -220,7 +222,12 @@ export default function PresentationMode({ nodes, edges, theme, client, onClose 
         padding: "12px 24px", background: "rgba(0,0,0,0.3)", backdropFilter: "blur(12px)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <span style={{ fontSize: 18, fontWeight: 800, color: theme.accent, fontFamily: "Instrument Serif" }}>HoldingVision <span style={{ fontWeight: 400 }}>Pro</span></span>
+          {brandStore.isWhiteLabel && brandStore.getLogoUrl() && (
+            <img src={brandStore.getLogoUrl()} alt="" style={{ height: 28, objectFit: "contain" }} onError={e => { e.target.style.display = "none"; }} />
+          )}
+          <span style={{ fontSize: 18, fontWeight: 800, color: theme.accent, fontFamily: "Instrument Serif" }}>
+            {brandStore.isWhiteLabel ? brandStore.getDisplayName() : <>HoldingVision <span style={{ fontWeight: 400 }}>Pro</span></>}
+          </span>
           <span style={{ fontSize: 14, fontWeight: 700, color: "var(--tx-primary)", fontFamily: "Syne" }}>{client || "Client"}</span>
           <span style={{ fontSize: 10, color: "var(--tx-tertiary)", fontFamily: "Space Mono" }}>{date}</span>
         </div>
