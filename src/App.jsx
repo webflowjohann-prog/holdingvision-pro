@@ -28,6 +28,7 @@ import TemplateChooser from "./ui/TemplateChooser.jsx";
 import ProfileSelector from "./ui/ProfileSelector.jsx";
 import BrandingSetup from "./ui/BrandingSetup.jsx";
 import useBrandStore from "./store/brandStore.js";
+import { getBrandTheme, brandToEffectiveTheme } from "./engine/brandThemes.js";
 import { ENTRY_PROFILES, BRICKS, getAvailableNodeTypes, getAISystemPrompt, getProfileTheme } from "./engine/bricks.js";
 import { analyzeAlerts } from "./engine/alerts.js";
 import { supabase } from "./lib/supabase.js";
@@ -224,46 +225,95 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
   // ═══ PROFILE THEME SYSTEM ═══
   const theme = getProfileTheme(profile);
 
-  // ═══ BRAND-AWARE THEME: override profile theme with brand colors ═══
-  const effectiveTheme = brandStore.isWhiteLabel ? {
-    ...theme,
-    accent: brandStore.getPrimaryColor(),
-    accentBright: brandStore.getSecondaryColor(),
-    accentDim: brandStore.getPrimaryColor() + "cc",
-    accentGlow: brandStore.getPrimaryColor() + "22",
-    nodeSelBorder: brandStore.getPrimaryColor() + "99",
-    flowParticle: brandStore.getPrimaryColor(),
-    borderHover: brandStore.getPrimaryColor() + "33",
-    borderAccent: brandStore.getPrimaryColor() + "20",
-    btnBg: `linear-gradient(135deg, ${brandStore.getPrimaryColor()}, ${brandStore.getSecondaryColor()})`,
-    cardBorder: brandStore.getPrimaryColor() + "25",
-  } : theme;
+  // ═══ BRAND-AWARE THEME: full brand theme replaces profile theme ═══
+  const activeBrand = brandStore.brand?.themeId
+    ? getBrandTheme(brandStore.brand.themeId)
+    : null;
 
-  // Apply profile theme to CSS custom properties
+  const effectiveTheme = activeBrand
+    ? { ...theme, ...brandToEffectiveTheme(activeBrand) }
+    : theme;
+
+  // Apply theme to CSS custom properties (supports both light and dark mode brands)
   useEffect(() => {
     const r = document.documentElement.style;
-    r.setProperty("--bg-canvas", effectiveTheme.canvasBg);
-    r.setProperty("--bg-base", effectiveTheme.sidebarBg);
-    r.setProperty("--node-bg", effectiveTheme.nodeBg);
-    r.setProperty("--node-border-sel", effectiveTheme.nodeSelBorder);
-    r.setProperty("--flow-particle", effectiveTheme.flowParticle);
-    r.setProperty("--border-hover", effectiveTheme.borderHover);
-    r.setProperty("--border-active", effectiveTheme.accent);
-    r.setProperty("--shadow-glow", `0 0 20px ${effectiveTheme.accentGlow}`);
-    // Also override copper/gold/accent when branded
-    if (brandStore.isWhiteLabel) {
-      r.setProperty("--copper", brandStore.getPrimaryColor());
-      r.setProperty("--copper-bright", brandStore.getSecondaryColor());
-      r.setProperty("--gold", brandStore.getPrimaryColor());
-      r.setProperty("--gold-bright", brandStore.getSecondaryColor());
-      r.setProperty("--accent", brandStore.getPrimaryColor());
-      r.setProperty("--orange-accent", brandStore.getSecondaryColor());
+    const t = effectiveTheme;
+    const isLight = t.mode === "light";
+
+    // Layout
+    r.setProperty("--bg-canvas", t.canvasBg);
+    r.setProperty("--bg-base", t.sidebarBg);
+    r.setProperty("--bg-deep", isLight ? "#f0f1f4" : "#0e0d0b");
+    r.setProperty("--node-bg", t.nodeBg);
+    r.setProperty("--node-border-sel", t.nodeSelBorder || t.accent);
+    r.setProperty("--flow-particle", t.flowParticle);
+    r.setProperty("--border-hover", t.borderHover);
+    r.setProperty("--border-active", t.accent);
+    r.setProperty("--shadow-glow", `0 0 20px ${t.accentGlow}`);
+
+    // Accent system
+    r.setProperty("--copper", t.accent);
+    r.setProperty("--copper-bright", t.accentBright);
+    r.setProperty("--copper-dim", t.accentDim);
+    r.setProperty("--gold", t.accent);
+    r.setProperty("--gold-bright", t.accentBright);
+    r.setProperty("--gold-dim", t.accentDim);
+    r.setProperty("--accent", t.accent);
+    r.setProperty("--orange-accent", t.accentBright);
+    r.setProperty("--gold-glow", t.accentGlow);
+
+    // Text hierarchy (critical for light mode)
+    if (t.txPrimary) {
+      r.setProperty("--tx-primary", t.txPrimary);
+      r.setProperty("--tx-secondary", t.txSecondary);
+      r.setProperty("--tx-tertiary", t.txTertiary);
+      r.setProperty("--tx-muted", t.txMuted);
+      r.setProperty("--tx", t.txPrimary);
+      r.setProperty("--tx2", t.txSecondary);
+      r.setProperty("--tx3", t.txTertiary);
     }
+
+    // Backgrounds for light mode
+    if (isLight) {
+      r.setProperty("--bg-card", t.cardBg || "#ffffff");
+      r.setProperty("--bg-card-hover", t.inputBg || "#f0f1f6");
+      r.setProperty("--bg-elevated", t.inputBg || "#f0f1f6");
+      r.setProperty("--bg-input", t.inputBg || "#f0f1f6");
+      r.setProperty("--bg-surface", t.cardBg || "#ffffff");
+      r.setProperty("--bg-hover", t.inputBg || "#f0f1f6");
+      r.setProperty("--card", t.cardBg || "#ffffff");
+      r.setProperty("--border", t.borderAccent || "rgba(0,0,0,0.08)");
+      r.setProperty("--brd", t.borderAccent || "rgba(0,0,0,0.08)");
+      r.setProperty("--glass", "rgba(255,255,255,0.92)");
+      r.setProperty("--glass-border", t.borderAccent || "rgba(0,0,0,0.06)");
+      r.setProperty("--node-border", t.nodeBorder || "rgba(0,0,0,0.10)");
+      r.setProperty("--shadow-sm", "0 1px 3px rgba(0,0,0,0.08)");
+      r.setProperty("--shadow-md", "0 4px 12px rgba(0,0,0,0.10)");
+      r.setProperty("--shadow-lg", "0 8px 32px rgba(0,0,0,0.12)");
+    }
+
+    // Borders
+    r.setProperty("--brd-light", t.borderHover);
+    r.setProperty("--brd-gold", t.accent);
+    r.setProperty("--border-hover", t.borderHover);
+    r.setProperty("--copper-muted", t.accentDim);
+
     return () => {
-      r.removeProperty("--bg-canvas");
-      r.removeProperty("--bg-base");
+      // Clean up all custom properties on unmount
+      const props = [
+        "--bg-canvas", "--bg-base", "--bg-deep", "--node-bg", "--node-border-sel",
+        "--flow-particle", "--border-hover", "--border-active", "--shadow-glow",
+        "--copper", "--copper-bright", "--copper-dim", "--gold", "--gold-bright",
+        "--gold-dim", "--accent", "--orange-accent", "--gold-glow",
+        "--tx-primary", "--tx-secondary", "--tx-tertiary", "--tx-muted", "--tx", "--tx2", "--tx3",
+        "--bg-card", "--bg-card-hover", "--bg-elevated", "--bg-input", "--bg-surface",
+        "--bg-hover", "--card", "--border", "--brd", "--glass", "--glass-border",
+        "--node-border", "--shadow-sm", "--shadow-md", "--shadow-lg",
+        "--brd-light", "--brd-gold", "--copper-muted",
+      ];
+      props.forEach(p => r.removeProperty(p));
     };
-  }, [profile, theme]);
+  }, [profile, effectiveTheme]);
   const { nodes, edges, selectedNode, selectedEdge, zoom, pan } = store;
   const { selectNode, selectEdge, clearSelection, updateNodeData, updateNode } = store;
   const { removeNode, addNode, addEdge, updateEdge, removeEdge } = store;
