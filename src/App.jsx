@@ -174,6 +174,25 @@ function AppWithProject({ user, project, onBack, onLogout }) {
   // Init brand on mount with userId (loads from Supabase, applies CSS vars)
   useEffect(() => { brandStore.init(user?.id); }, [user?.id]);
 
+  // Auto-select profile from brand theme (skip ProfileSelector for white-label accounts)
+  useEffect(() => {
+    const brand = brandStore.brand;
+    if (brand?.themeId && (!profile || !activeBricks)) {
+      const bt = getBrandTheme(brand.themeId);
+      if (bt?.profileId) {
+        const entry = ENTRY_PROFILES.find(p => p.id === bt.profileId);
+        if (entry) {
+          setProfile(bt.profileId);
+          setActiveBricks(entry.activeBricks || ["socle"]);
+          try {
+            localStorage.setItem("hvpro-profile", bt.profileId);
+            localStorage.setItem("hvpro-bricks", JSON.stringify(entry.activeBricks || ["socle"]));
+          } catch(e) {}
+        }
+      }
+    }
+  }, [brandStore.brand, profile, activeBricks]);
+
   const handleProfileSelect = (id) => {
     const entry = ENTRY_PROFILES.find(p => p.id === id);
     setProfile(id);
@@ -199,13 +218,33 @@ function AppWithProject({ user, project, onBack, onLogout }) {
     });
   };
 
-  // Show profile selector if no profile chosen
+  // Show profile selector only if no profile AND no brand to auto-select from
+  if ((!profile || !activeBricks) && !brandStore.brand?.themeId) {
+    return <ProfileSelector onSelect={handleProfileSelect} />;
+  }
+
+  // Still loading brand from Supabase and no profile yet
+  if ((!profile || !activeBricks) && brandStore.loading) {
+    return (
+      <div style={{
+        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+        background: "#0e0d0a", color: "#d4b062", fontFamily: "Syne",
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 32, marginBottom: 8 }}>HoldingVision</div>
+          <div style={{ fontSize: 12, opacity: 0.5 }}>Chargement du profil...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback: if still no profile (no brand at all), show selector
   if (!profile || !activeBricks) {
     return <ProfileSelector onSelect={handleProfileSelect} />;
   }
 
-  // Show branding setup after profile selection (first time only)
-  if (showBranding) {
+  // Show branding setup after profile selection (first time only, skip if brand already exists)
+  if (showBranding && !brandStore.brand) {
     return <BrandingSetup
       profileId={profile}
       onComplete={(brand) => {
