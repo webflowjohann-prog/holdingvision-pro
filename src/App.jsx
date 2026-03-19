@@ -91,9 +91,17 @@ export default function App() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    // Clear brand from localStorage so next login loads fresh from Supabase
+    localStorage.removeItem("hvp_brand");
+    localStorage.removeItem("hvpro-profile");
+    localStorage.removeItem("hvpro-bricks");
     setUser(null);
     setCurrentProject(null);
     sessionStorage.removeItem("hvpro-current-project");
+    // Reset CSS variables
+    const r = document.documentElement.style;
+    ["--copper","--accent","--gold","--tx-primary","--tx-secondary","--tx-tertiary","--bg-card","--bg-canvas","--node-bg","--bg-input","--bg-elevated","--border"].forEach(p => r.removeProperty(p));
+    window.location.reload();
   };
 
   const handleOpenProject = (project) => {
@@ -313,7 +321,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
       ];
       props.forEach(p => r.removeProperty(p));
     };
-  }, [profile, effectiveTheme]);
+  }, [profile, effectiveTheme, brandStore.brand]);
   const { nodes, edges, selectedNode, selectedEdge, zoom, pan } = store;
   const { selectNode, selectEdge, clearSelection, updateNodeData, updateNode } = store;
   const { removeNode, addNode, addEdge, updateEdge, removeEdge } = store;
