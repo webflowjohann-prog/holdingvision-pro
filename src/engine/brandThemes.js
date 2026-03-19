@@ -170,30 +170,31 @@ export const BRAND_THEMES = {
     name: "AXA",
     subtitle: "Assurances Particuliers et Professionnels",
     profileId: "assurance",
-    logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/AXA_Logo.svg/320px-AXA_Logo.svg.png",
+    logoUrl: "/logo-axa.png",
     sourceUrl: "https://www.axa.fr",
 
     mode: "light",
 
-    canvasBg: "#f5f5fb",
+    canvasBg: "#eeeef8",
     canvasGradient: "radial-gradient(ellipse at 50% 30%, rgba(0,0,143,0.04) 0%, transparent 60%)",
     sidebarBg: "#00008f",
-    topBarBg: "rgba(255,255,255,0.95)",
-    gridDot: "#d8d8e8",
+    topBarBg: "#00008f",
+    gridDot: "#d0d0e0",
 
     accent: "#00008f",
     accentBright: "#2020b0",
     accentDim: "#000060",
     accentGlow: "rgba(0,0,143,0.10)",
 
-    nodeBg: "#ffffff",
-    nodeBorder: "rgba(0,0,143,0.12)",
-    nodeSelBorder: "#00008f",
-    nodeText: "#1a1a3a",
-    nodeSubtext: "#6a6a90",
+    // Noeuds bleu AXA avec texte blanc
+    nodeBg: "#00008f",
+    nodeBorder: "rgba(0,0,143,0.40)",
+    nodeSelBorder: "#c91432",
+    nodeText: "#ffffff",
+    nodeSubtext: "rgba(255,255,255,0.65)",
 
-    flowParticle: "#00008f",
-    flowLine: "rgba(0,0,143,0.30)",
+    flowParticle: "#c91432",
+    flowLine: "rgba(201,20,50,0.35)",
 
     borderAccent: "rgba(0,0,143,0.10)",
     borderHover: "rgba(0,0,143,0.25)",
@@ -208,10 +209,10 @@ export const BRAND_THEMES = {
     tagBg: "rgba(0,0,143,0.06)",
     tagBorder: "rgba(0,0,143,0.18)",
 
-    txPrimary: "#1a1a3a",
-    txSecondary: "#5a5a80",
-    txTertiary: "#9a9ab0",
-    txMuted: "#d0d0e0",
+    txPrimary: "#0a0a3a",
+    txSecondary: "#3a3a70",
+    txTertiary: "#7a7aa0",
+    txMuted: "#b0b0d0",
 
     sidebarText: "#ffffff",
     sidebarTextDim: "rgba(255,255,255,0.6)",
@@ -219,9 +220,11 @@ export const BRAND_THEMES = {
     sidebarBorder: "rgba(255,255,255,0.12)",
     sidebarBtnActive: "rgba(255,255,255,0.15)",
 
+    sidebarLogoBg: "#00008f",
+
     inputBg: "#f0f0f8",
     inputBorder: "rgba(0,0,143,0.12)",
-    inputText: "#1a1a3a",
+    inputText: "#0a0a3a",
 
     kpiCardBg: "#ffffff",
     kpiBorder: "rgba(0,0,143,0.06)",
