@@ -101,7 +101,7 @@ export const BRAND_THEMES = {
     name: "Fidal",
     subtitle: "Cabinet d'Avocats en Droit des Affaires",
     profileId: "avocat",
-    logoUrl: "https://www.fidal.com/themes/custom/fidal/assets/img/logo-fidal.svg",
+    logoUrl: "/logo-fidal.svg",
     sourceUrl: "https://www.fidal.com",
 
     mode: "dark",
@@ -109,7 +109,7 @@ export const BRAND_THEMES = {
     canvasBg: "#0a1525",
     canvasGradient: "radial-gradient(ellipse at 50% 30%, rgba(109,213,220,0.04) 0%, transparent 60%)",
     sidebarBg: "#0f1e38",
-    topBarBg: "rgba(10,21,37,0.95)",
+    topBarBg: "#0f1e38",
     gridDot: "#162840",
 
     accent: "#6dd5dc",
@@ -117,13 +117,13 @@ export const BRAND_THEMES = {
     accentDim: "#3a8a90",
     accentGlow: "rgba(109,213,220,0.12)",
 
-    nodeBg: "#132238",
-    nodeBorder: "rgba(109,213,220,0.15)",
+    nodeBg: "#0f1e38",
+    nodeBorder: "rgba(109,213,220,0.20)",
     nodeSelBorder: "#6dd5dc",
-    nodeText: "#e0e8f0",
-    nodeSubtext: "#7a90a8",
+    nodeText: "#ffffff",
+    nodeSubtext: "rgba(255,255,255,0.60)",
 
-    flowParticle: "#6dd5dc",
+    flowParticle: "#ffe764",
     flowLine: "rgba(109,213,220,0.35)",
 
     borderAccent: "rgba(109,213,220,0.15)",
@@ -149,6 +149,8 @@ export const BRAND_THEMES = {
     sidebarAccent: "#6dd5dc",
     sidebarBorder: "rgba(109,213,220,0.10)",
     sidebarBtnActive: "rgba(109,213,220,0.12)",
+
+    sidebarLogoBg: "#ffffff",
 
     inputBg: "#0a1525",
     inputBorder: "rgba(109,213,220,0.15)",
@@ -233,72 +235,75 @@ export const BRAND_THEMES = {
   },
 
   // ═══════════════════════════════════════════════
-  // 4. BARNES — Immobilier de luxe
-  //    Fond sombre, noir #141414, accent rouge carmin #c70a33
-  //    Esprit : luxe, exclusivité, dark élégant
+  // 4. GAN — Assurances
+  //    Fond clair, bleu GAN #173461, accent jaune #ffd715
+  //    Esprit : proximité, confiance, bleu et jaune
   // ═══════════════════════════════════════════════
-  barnes: {
-    id: "barnes",
-    name: "BARNES International",
-    subtitle: "Immobilier de prestige",
-    profileId: "immo",
-    logoUrl: "https://www.barnes-international.com/templates/biv6/images/logo/logo.png",
-    sourceUrl: "https://www.barnes-international.com",
+  gan: {
+    id: "gan",
+    name: "GAN Assurances",
+    subtitle: "Votre assureur, c'est quelqu'un",
+    profileId: "assurance",
+    logoUrl: "/logo-gan.svg",
+    sourceUrl: "https://www.gan.fr",
 
-    mode: "dark",
+    mode: "light",
 
-    canvasBg: "#0e0e0e",
-    canvasGradient: "radial-gradient(ellipse at 50% 30%, rgba(199,10,51,0.04) 0%, transparent 60%)",
-    sidebarBg: "#141414",
-    topBarBg: "rgba(14,14,14,0.95)",
-    gridDot: "#252525",
+    canvasBg: "#eef2f8",
+    canvasGradient: "radial-gradient(ellipse at 50% 30%, rgba(23,52,97,0.04) 0%, transparent 60%)",
+    sidebarBg: "#173461",
+    topBarBg: "#173461",
+    gridDot: "#c8d0e0",
 
-    accent: "#c70a33",
-    accentBright: "#e82050",
-    accentDim: "#8a0822",
-    accentGlow: "rgba(199,10,51,0.12)",
+    accent: "#173461",
+    accentBright: "#249ad2",
+    accentDim: "#001e49",
+    accentGlow: "rgba(23,52,97,0.10)",
 
-    nodeBg: "#1c1c1c",
-    nodeBorder: "rgba(199,10,51,0.15)",
-    nodeSelBorder: "#c70a33",
-    nodeText: "#f0ece8",
-    nodeSubtext: "#8a8480",
+    // Noeuds bleu GAN avec texte blanc
+    nodeBg: "#173461",
+    nodeBorder: "rgba(23,52,97,0.40)",
+    nodeSelBorder: "#ffd715",
+    nodeText: "#ffffff",
+    nodeSubtext: "rgba(255,255,255,0.65)",
 
-    flowParticle: "#c70a33",
-    flowLine: "rgba(199,10,51,0.35)",
+    flowParticle: "#ffd715",
+    flowLine: "rgba(23,52,97,0.30)",
 
-    borderAccent: "rgba(199,10,51,0.15)",
-    borderHover: "rgba(199,10,51,0.30)",
+    borderAccent: "rgba(23,52,97,0.10)",
+    borderHover: "rgba(23,52,97,0.25)",
 
-    btnActive: "rgba(199,10,51,0.12)",
-    btnBg: "linear-gradient(135deg, #c70a33, #8a0822)",
+    btnActive: "rgba(23,52,97,0.10)",
+    btnBg: "linear-gradient(135deg, #173461, #001e49)",
     btnText: "#ffffff",
 
-    cardBg: "#1c1c1c",
-    cardBorder: "rgba(199,10,51,0.12)",
+    cardBg: "#ffffff",
+    cardBorder: "rgba(23,52,97,0.08)",
 
-    tagBg: "rgba(199,10,51,0.08)",
-    tagBorder: "rgba(199,10,51,0.20)",
+    tagBg: "rgba(23,52,97,0.06)",
+    tagBorder: "rgba(23,52,97,0.18)",
 
-    txPrimary: "#f0ece8",
-    txSecondary: "#9a9490",
-    txTertiary: "#5a5450",
-    txMuted: "#2a2825",
+    txPrimary: "#0a1a3a",
+    txSecondary: "#3a4a70",
+    txTertiary: "#7a8aa0",
+    txMuted: "#b0b8d0",
 
-    sidebarText: "#f0ece8",
-    sidebarTextDim: "rgba(240,236,232,0.5)",
-    sidebarAccent: "#e82050",
-    sidebarBorder: "rgba(199,10,51,0.12)",
-    sidebarBtnActive: "rgba(199,10,51,0.12)",
+    sidebarText: "#ffffff",
+    sidebarTextDim: "rgba(255,255,255,0.6)",
+    sidebarAccent: "#ffd715",
+    sidebarBorder: "rgba(255,255,255,0.12)",
+    sidebarBtnActive: "rgba(255,255,255,0.15)",
 
-    inputBg: "#0e0e0e",
-    inputBorder: "rgba(199,10,51,0.15)",
-    inputText: "#f0ece8",
+    sidebarLogoBg: "#ffffff",
 
-    kpiCardBg: "#1c1c1c",
-    kpiBorder: "rgba(199,10,51,0.08)",
+    inputBg: "#f0f2f8",
+    inputBorder: "rgba(23,52,97,0.12)",
+    inputText: "#0a1a3a",
 
-    secondary: "#d4a060",
+    kpiCardBg: "#ffffff",
+    kpiBorder: "rgba(23,52,97,0.06)",
+
+    secondary: "#ffd715",
   },
 };
 
