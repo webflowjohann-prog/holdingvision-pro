@@ -472,28 +472,28 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
             <button onClick={onBack}
               style={{
                 display: "flex", alignItems: "center", gap: 6, width: "100%",
-                padding: "6px 8px", borderRadius: 8, border: "1px solid rgba(212, 176, 98, 0.15)",
-                background: "rgba(212, 176, 98, 0.05)", color: effectiveTheme.accent,
+                padding: "6px 8px", borderRadius: 8, border: `1px solid ${effectiveTheme.sidebarBorder || "rgba(255,255,255,0.15)"}`,
+                background: effectiveTheme.sidebarBtnActive || "rgba(255,255,255,0.08)", color: effectiveTheme.sidebarAccent || effectiveTheme.accent,
                 fontSize: 10, fontWeight: 600, fontFamily: "Syne", cursor: "pointer",
                 transition: "all 0.2s",
               }}>
               <span style={{ fontSize: 12 }}>←</span> Mes dossiers
             </button>
             <div style={{
-              fontSize: 10, fontWeight: 700, color: "var(--tx-primary)",
+              fontSize: 10, fontWeight: 700, color: effectiveTheme.sidebarText || "#ffffff",
               marginTop: 6, padding: "0 4px", lineHeight: 1.3,
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>{project.name}</div>
             {project.client_name && (
-              <div style={{ fontSize: 9, color: "var(--tx-tertiary)", padding: "0 4px", marginTop: 2 }}>
+              <div style={{ fontSize: 9, color: effectiveTheme.sidebarTextDim || "rgba(255,255,255,0.5)", padding: "0 4px", marginTop: 2 }}>
                 {project.client_name}
               </div>
             )}
           </div>
         )}
 
-        <div style={{ width: "100%", height: 1, background: "var(--border)", marginBottom: 4 }} />
-        <div style={{ padding: "0 6px", fontSize: 8, fontWeight: 700, color: "var(--tx-tertiary)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4, marginTop: 4, paddingLeft: 12 }}>Navigation</div>
+        <div style={{ width: "100%", height: 1, background: effectiveTheme.sidebarBorder || "var(--border)", marginBottom: 4 }} />
+        <div style={{ padding: "0 6px", fontSize: 8, fontWeight: 700, color: effectiveTheme.sidebarTextDim || "var(--tx-tertiary)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4, marginTop: 4, paddingLeft: 12 }}>Navigation</div>
         {sideItems.filter(it => !it.action && !it.sep).map(it => {
           const isActive = tab === it.id;
           return (
