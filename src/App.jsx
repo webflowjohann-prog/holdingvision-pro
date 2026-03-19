@@ -787,7 +787,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                   else if (node.type === "donation" && comp) sub = `Droits ${fMoney(comp.droitsTotal)}€${comp.isDemembre ? " (NP)" : ""}`;
                   else if (node.type === "contrat_av" && comp) sub = `${fMoney(comp.capitalNet)}€ · Rdt ${comp.rdmtNet}% · An8: ${fMoney(comp.capital8ans)}€`;
                   else if (node.type === "employeur" && comp) sub = `${comp.statut} · Brut ${fMoney(comp.salaireBrut)}€/an`;
-                  else if (node.type === "personne" && comp) sub = `Net ${fMoney(comp.netMensuel)}€/m · TMI ${comp.tmi}% · IR ${fMoney(comp.ir)}€`;
+                  else if (node.type === "personne" && comp) sub = `${comp.prenom || ""} ${comp.age ? comp.age + "ans" : ""} · Net ${fMoney(comp.netMensuel)}€/m`;
 
                   const darkNode = effectiveTheme.nodeBg && effectiveTheme.nodeText === "#ffffff";
                   // If node is dark, lighten the entity color for visibility

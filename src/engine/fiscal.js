@@ -632,20 +632,56 @@ export function calcNode(node, inEdges, fv) {
   // ═══ PERSONNE / SALARIÉ ═══
   if (node.type === "personne") {
     const prenom = d.prenom || "Personne";
+    const age = d.age || 45;
     const statut = d.statut || "cadre";
     const parts = d.partsFiscales || 1;
-    const tauxCotis = statut === "cadre" ? 0.22 : statut === "fonctionnaire" ? 0.15 : 0.155;
+    
+    // Taux cotisations par statut
+    const tauxCotisMap = { cadre: 0.22, non_cadre: 0.155, fonctionnaire: 0.15, tns: 0.45, retraite: 0, sans_activite: 0 };
+    const tauxCotis = tauxCotisMap[statut] || 0.22;
+    
+    // Revenus salariaux (entrants ou manuels)
     const salaireBrut = inc || d.salaireBrut || 0;
     const cotisations = Math.round(salaireBrut * tauxCotis);
     const salaireNet = salaireBrut - cotisations;
-    const irResult = calcIR(salaireNet, parts);
-    const netApresIR = salaireNet - irResult.ir;
+    
+    // Pension de retraite
+    const pensionBrute = d.pensionBrute || 0;
+    
+    // Revenus complémentaires
+    const revenusFonciers = d.revenusFonciers || 0;
+    const autresRevenus = d.autresRevenus || 0;
+    
+    // Revenu total imposable
+    const revenuImposable = salaireNet + pensionBrute + revenusFonciers + autresRevenus;
+    const revenuTotal = salaireBrut + pensionBrute + revenusFonciers + autresRevenus;
+    
+    // Calcul IR
+    const irResult = revenuImposable > 0 ? calcIR(revenuImposable, parts) : { ir: 0, tmi: 0, tauxMoyen: "0" };
+    const netApresIR = revenuImposable - irResult.ir;
+    
+    // Charges personnelles
+    const chargeLoyer = d.chargeLoyer || 0;
+    const pensionAlimentaire = d.pensionAlimentaire || 0;
+    const chargesPersoMensuelles = chargeLoyer + pensionAlimentaire;
+    const disponibleMensuel = Math.round(netApresIR / 12) - chargesPersoMensuelles;
+    
+    // Patrimoine
+    const residencePrincipale = d.residencePrincipale || 0;
+    const epargneDisponible = d.epargneDisponible || 0;
+    const investissementsHorsSchema = d.investissementsHorsSchema || 0;
+    const patrimoineTotal = residencePrincipale + epargneDisponible + investissementsHorsSchema;
+    
     return {
-      prenom, statut, parts, salaireBrut, tauxCotis: Math.round(tauxCotis * 100),
-      cotisations, salaireNet, ir: irResult.ir, tmi: Math.round(irResult.tmi * 100),
-      tauxMoyen: salaireNet > 0 ? Math.round(irResult.ir / salaireNet * 1000) / 10 : 0,
+      prenom, age, statut, parts, salaireBrut, tauxCotis: Math.round(tauxCotis * 100),
+      cotisations, salaireNet, pensionBrute, revenusFonciers, autresRevenus,
+      revenuImposable, revenuTotal,
+      ir: irResult.ir, tmi: Math.round(irResult.tmi * 100),
+      tauxMoyen: revenuImposable > 0 ? Math.round(irResult.ir / revenuImposable * 1000) / 10 : 0,
       netApresIR, netMensuel: Math.round(netApresIR / 12),
-      inc: salaireBrut, dist: netApresIR,
+      chargesPersoMensuelles, disponibleMensuel,
+      residencePrincipale, epargneDisponible, investissementsHorsSchema, patrimoineTotal,
+      inc: revenuTotal, dist: netApresIR,
     };
   }
 
