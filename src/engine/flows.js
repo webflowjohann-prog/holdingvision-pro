@@ -120,6 +120,47 @@ export function computeFlows(nodes, edges) {
   });
 
   // ══════════════════════════════════════════════════
+  // PASS 4b: Compute BANQUE nodes (financing → targets)
+  // Banque → SCI: financement immo (inject intérêts déductibles)
+  // Banque → Société: crédit pro (inject intérêts déductibles)
+  // Banque → Foyer/Personne: charge mensuelle crédit immo
+  // Banque → Holding: ligne de trésorerie
+  // ══════════════════════════════════════════════════
+  nodes.filter(n => n.type === "banque").forEach(n => {
+    const c = processNode(n);
+    
+    getOutEdges(n.id).forEach(e => {
+      if (e.montantFixe != null) return;
+      const target = findNode(e.to);
+      
+      if (e.flow === "emprunt" || e.flow === "financement") {
+        // Generic emprunt/financement: use credit immo charge
+        if (target?.type === "sci") {
+          if (c.interetsImmoAn1 > 0) {
+            target.data = { ...target.data, _empruntInterets: c.interetsImmoAn1 };
+          }
+          fv[e.id] = c.mensualiteImmoAnnuelle || 0;
+        } else if (target?.type === "foyer" || target?.type === "personne") {
+          fv[e.id] = c.mensualiteImmoAnnuelle || 0;
+        } else {
+          fv[e.id] = c.mensualiteImmoAnnuelle || 0;
+        }
+      } else if (e.flow === "credit_pro") {
+        if (target?.type === "societe" || target?.type === "holding") {
+          if (c.interetsProAn1 > 0) {
+            target.data = { ...target.data, _creditProInterets: c.interetsProAn1 };
+          }
+        }
+        fv[e.id] = c.mensualiteProAnnuelle || 0;
+      } else if (e.flow === "ligne_treso") {
+        fv[e.id] = c.ligneTreso?.coutAnnuel || 0;
+      } else if (e.flow === "invest") {
+        fv[e.id] = c.financementImmo || c.financementPro || 0;
+      }
+    });
+  });
+
+  // ══════════════════════════════════════════════════
   // PASS 5: Compute EMPLOYEURS (salary source → personne)
   // ══════════════════════════════════════════════════
   nodes.filter(n => n.type === "employeur").forEach(n => {

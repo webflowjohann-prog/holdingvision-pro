@@ -56,6 +56,7 @@ export const ETYPES = [
   { id: "source", l: "Source revenus", icon: "○", c: "#6b6a65", brick: "socle" },
   { id: "employeur", l: "Employeur", icon: "⊡", c: "#4a6580", brick: "socle" },
   { id: "personne", l: "Personne / Salarié", icon: "☻", c: "#3a8090", brick: "socle" },
+  { id: "banque", l: "Banque / Financement", icon: "⊕", c: "#2060a0", brick: "socle" },
   // Brique Immobilier
   { id: "emprunt", l: "Emprunt bancaire", icon: "⊞", c: "#c07020", brick: "immo" },
   // Brique Juridique
@@ -75,6 +76,9 @@ export const FLOWS = [
   { id: "invest", l: "Investissement", c: "#2a7d3f" },
   { id: "rendement", l: "Rendement / Intérêts", c: "#5a7a20" },
   { id: "emprunt", l: "Mensualité emprunt", c: "#c07020" },
+  { id: "credit_pro", l: "Crédit professionnel", c: "#2060a0" },
+  { id: "ligne_treso", l: "Ligne de trésorerie", c: "#3080b0" },
+  { id: "financement", l: "Financement", c: "#2060a0" },
   { id: "cession", l: "Produit de cession", c: "#5080c0" },
   { id: "donation_flux", l: "Donation", c: "#4898d0" },
   { id: "autre", l: "Autre flux", c: "#6b6a65" },
@@ -682,6 +686,102 @@ export function calcNode(node, inEdges, fv) {
       chargesPersoMensuelles, disponibleMensuel,
       residencePrincipale, epargneDisponible, investissementsHorsSchema, patrimoineTotal,
       inc: revenuTotal, dist: netApresIR,
+    };
+  }
+
+  // ═══ BANQUE / ÉTABLISSEMENT FINANCIER ═══
+  if (node.type === "banque") {
+    const nomBanque = d.nomBanque || "Banque";
+    
+    // Helper: mensualité de crédit amortissable
+    const calcMensualite = (capital, tauxAnnuel, dureeMois) => {
+      if (capital <= 0 || dureeMois <= 0) return 0;
+      if (tauxAnnuel <= 0) return Math.round(capital / dureeMois);
+      const tm = tauxAnnuel / 100 / 12;
+      return Math.round(capital * tm / (1 - Math.pow(1 + tm, -dureeMois)));
+    };
+    
+    // Helper: intérêts première année
+    const calcInteretsAn1 = (capital, tauxAnnuel, mensualite) => {
+      if (capital <= 0 || tauxAnnuel <= 0) return 0;
+      const tm = tauxAnnuel / 100 / 12;
+      let restant = capital;
+      let totalInterets = 0;
+      for (let m = 0; m < 12 && restant > 0; m++) {
+        const interets = Math.round(restant * tm);
+        totalInterets += interets;
+        restant -= (mensualite - interets);
+      }
+      return totalInterets;
+    };
+    
+    // ─── Crédit immobilier ───
+    let creditImmo = null;
+    const ciCapital = d.creditImmoCapital || 0;
+    const ciTaux = d.creditImmoTaux || 0;
+    const ciDuree = d.creditImmoDuree || 0;
+    const ciAssurance = d.creditImmoAssurance || 0;
+    if (ciCapital > 0 && ciDuree > 0) {
+      const mensualite = calcMensualite(ciCapital, ciTaux, ciDuree * 12);
+      const mensualiteTotale = mensualite + ciAssurance;
+      const chargeAnnuelle = mensualiteTotale * 12;
+      const interetsAn1 = calcInteretsAn1(ciCapital, ciTaux, mensualite);
+      const coutTotal = mensualiteTotale * ciDuree * 12;
+      const taeg = ciCapital > 0 ? Math.round((coutTotal / ciCapital - 1) / ciDuree * 100 * 100) / 100 : 0;
+      creditImmo = { mensualite, mensualiteTotale, chargeAnnuelle, interetsAn1, coutTotal, taeg, capital: ciCapital };
+    }
+    
+    // ─── Crédit professionnel ───
+    let creditPro = null;
+    const cpCapital = d.creditProCapital || 0;
+    const cpTaux = d.creditProTaux || 0;
+    const cpDuree = d.creditProDuree || 0;
+    if (cpCapital > 0 && cpDuree > 0) {
+      const mensualite = calcMensualite(cpCapital, cpTaux, cpDuree * 12);
+      const chargeAnnuelle = mensualite * 12;
+      const interetsAn1 = calcInteretsAn1(cpCapital, cpTaux, mensualite);
+      const coutTotal = mensualite * cpDuree * 12;
+      creditPro = { mensualite, chargeAnnuelle, interetsAn1, coutTotal, capital: cpCapital };
+    }
+    
+    // ─── Ligne de trésorerie ───
+    let ligneTreso = null;
+    const ltMontant = d.ligneTresoMontant || 0;
+    const ltTaux = d.ligneTresoTaux || 0;
+    const ltUtilisation = d.ligneTresoUtilisation || 0;
+    if (ltMontant > 0 && ltTaux > 0 && ltUtilisation > 0) {
+      const encoursMoyen = Math.round(ltMontant * ltUtilisation / 100);
+      const coutAnnuel = Math.round(encoursMoyen * ltTaux / 100);
+      const coutMensuel = Math.round(coutAnnuel / 12);
+      ligneTreso = { encoursMoyen, coutAnnuel, coutMensuel, montantAutorise: ltMontant };
+    }
+    
+    // ─── Frais bancaires ───
+    const fraisTenueCompte = d.fraisTenueCompte || 0;
+    const fraisCommissions = d.fraisCommissions || 0;
+    const fraisCartes = d.fraisCartes || 0;
+    const fraisAutres = d.fraisAutres || 0;
+    const totalFrais = fraisTenueCompte + fraisCommissions + fraisCartes + fraisAutres;
+    
+    // ─── Totaux ───
+    const totalChargeAnnuelle = (creditImmo?.chargeAnnuelle || 0) + (creditPro?.chargeAnnuelle || 0) + (ligneTreso?.coutAnnuel || 0) + totalFrais;
+    const totalChargeMensuelle = Math.round(totalChargeAnnuelle / 12);
+    const totalInteretsDeductibles = (creditImmo?.interetsAn1 || 0) + (creditPro?.interetsAn1 || 0) + (ligneTreso?.coutAnnuel || 0);
+    const encoursTotalCredit = (creditImmo?.capital || 0) + (creditPro?.capital || 0);
+    
+    return {
+      nomBanque, typeBanque: d.typeBanque || "retail",
+      creditImmo, creditPro, ligneTreso,
+      totalFrais, totalChargeAnnuelle, totalChargeMensuelle,
+      totalInteretsDeductibles, encoursTotalCredit,
+      inc, dist: 0,
+      // For flows: the bank's main output is financing, its charge is the annual cost
+      financementImmo: creditImmo?.capital || 0,
+      financementPro: creditPro?.capital || 0,
+      mensualiteImmoAnnuelle: creditImmo?.chargeAnnuelle || 0,
+      mensualiteProAnnuelle: creditPro?.chargeAnnuelle || 0,
+      interetsImmoAn1: creditImmo?.interetsAn1 || 0,
+      interetsProAn1: creditPro?.interetsAn1 || 0,
     };
   }
 

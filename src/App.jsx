@@ -16,6 +16,7 @@ import DonationPanel from "./panels/DonationPanel.jsx";
 import ContratAVPanel from "./panels/ContratAVPanel.jsx";
 import EmployeurPanel from "./panels/EmployeurPanel.jsx";
 import PersonnePanel from "./panels/PersonnePanel.jsx";
+import BanquePanel from "./panels/BanquePanel.jsx";
 import ClientWizard from "./ui/ClientWizard.jsx";
 import CompareView from "./dashboard/CompareView.jsx";
 import AlertsPanel from "./dashboard/AlertsPanel.jsx";
@@ -827,6 +828,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                   else if (node.type === "contrat_av" && comp) sub = `${fMoney(comp.capitalNet)}€ · Rdt ${comp.rdmtNet}% · An8: ${fMoney(comp.capital8ans)}€`;
                   else if (node.type === "employeur" && comp) sub = `${comp.statut} · Brut ${fMoney(comp.salaireBrut)}€/an`;
                   else if (node.type === "personne" && comp) sub = `${comp.prenom || ""} ${comp.age ? comp.age + "ans" : ""} · Net ${fMoney(comp.netMensuel)}€/m`;
+                  else if (node.type === "banque" && comp) sub = `${comp.nomBanque || "Banque"} · ${fMoney(comp.totalChargeMensuelle)}€/m`;
 
                   const darkNode = effectiveTheme.nodeBg && effectiveTheme.nodeText === "#ffffff";
                   // If node is dark, lighten the entity color for visibility
@@ -983,6 +985,7 @@ function AppMain({ profile, profileData, activeBricks, toggleBrick, onChangeProf
                     {sN.type === "contrat_av" && <ContratAVPanel node={sN} computed={nc[selectedNode]} onData={(k, v) => updateNodeData(selectedNode, k, v)} />}
                     {sN.type === "employeur" && <EmployeurPanel node={sN} computed={nc[selectedNode]} onData={(k, v) => updateNodeData(selectedNode, k, v)} />}
                     {sN.type === "personne" && <PersonnePanel node={sN} computed={nc[selectedNode]} onData={(k, v) => updateNodeData(selectedNode, k, v)} />}
+                    {sN.type === "banque" && <BanquePanel node={sN} computed={nc[selectedNode]} onData={(k, v) => updateNodeData(selectedNode, k, v)} />}
                     {(sN.type === "fisc" || sN.type === "source" || sN.type === "invest") && nc[selectedNode] && (
                       <div style={{ padding: 14, fontSize: 11, color: "var(--tx-secondary)", background: "var(--bg-elevated)", borderRadius: 12, border: "1px solid var(--border)" }}>
                         {nc[selectedNode].detail || `Total reçu: ${fMoney(nc[selectedNode].inc || 0)} €`}
